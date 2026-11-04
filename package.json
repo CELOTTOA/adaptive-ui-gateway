@@ -1,0 +1,31 @@
+{
+  "name": "adaptive-ui-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "examples/*"
+  ],
+  "scripts": {
+    "build": "tsc -b apps/gateway-server apps/mcp-apps-server examples/customer-api",
+    "clean": "tsc -b apps/gateway-server apps/mcp-apps-server examples/customer-api --clean",
+    "test": "npm run build && node --test tests/**/*.test.mjs",
+    "demo": "npm run build && node --env-file-if-exists=.envlocal apps/gateway-server/dist/demo.js",
+    "demo:archteathos": "npm run build && node examples/archteathos/demo.mjs",
+    "test:archteathos": "npm run build && node --test tests/live/archteathos.test.mjs",
+    "check:publication": "node scripts/check-publication.mjs",
+    "smoke:demo": "node scripts/smoke-demo.mjs",
+    "export:publication": "node scripts/export-publication.mjs",
+    "test:live": "npm run build && node --env-file-if-exists=.envlocal --test tests/live/*.test.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

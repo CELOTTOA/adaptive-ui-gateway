@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AUG search view</title>
+  <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; font-size: 14px; }
+    body { margin: 0; padding: 12px 16px; }
+    h2 { font-size: 1.15rem; margin: 0 0 12px; }
+    .aug-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; margin-bottom: 12px; }
+    label { display: grid; gap: 4px; font-size: 0.85rem; }
+    input { font: inherit; padding: 6px 8px; min-width: 14rem; }
+    button { font: inherit; padding: 6px 14px; cursor: pointer; }
+    .aug-table-wrap { overflow-x: auto; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid color-mix(in srgb, currentColor 18%, transparent); }
+    th { font-weight: 600; }
+    [role="status"] { opacity: 0.75; font-size: 0.85rem; margin: 10px 0 0; }
+    .note { font-size: 0.75rem; opacity: 0.6; margin-top: 8px; }
+    #direct-connection { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; margin-bottom: 12px; }
+    #direct-connection[hidden] { display: none; }
+  </style>
+</head>
+<body>
+  <form id="direct-connection" hidden>
+    <label for="gateway-token">Direct AUG access token</label>
+    <input id="gateway-token" type="password" autocomplete="off" required>
+    <button id="connect-gateway" type="submit">Create interface</button>
+  </form>
+  <div id="app"><p role="status">Waiting for the view request…</p></div>
+  <details id="connection-details" hidden>
+    <summary>Connection details</summary>
+    <pre id="connection-diagnostics" style="white-space: pre-wrap; overflow-wrap: anywhere"></pre>
+  </details>
+  <p class="note">Protected view: the UI Plan and records travel directly between this view and AUG.</p>
+  <script type="module">
+/*__AUG_VIEW_SCRIPT__*/
+  </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+name: Bug report
+description: A reproducible failure using synthetic data
+body:
+  - type: markdown
+    attributes:
+      value: "Do not include secrets or real records. Follow SECURITY.md for vulnerabilities."
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Node version, AUG revision, and host/version if applicable
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Commands and minimal synthetic inputs
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and observed behavior
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Redacted logs or evidence
+      description: Distinguish a real host observation from a direct HTTP test.

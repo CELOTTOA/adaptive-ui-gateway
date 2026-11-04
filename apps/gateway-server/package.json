@@ -1,0 +1,23 @@
+{
+  "name": "@aug/gateway-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "dependencies": {
+    "@aug/capability-catalog": "0.1.0",
+    "@aug/core": "0.1.0",
+    "@aug/discovery-openapi": "0.1.0",
+    "@aug/example-customer-api": "0.1.0",
+    "@aug/model-provider-xai": "0.1.0",
+    "@aug/security": "0.1.0",
+    "@aug/ui-planner": "0.1.0",
+    "@aug/ui-renderer": "0.1.0",
+    "@aug/ui-schema": "0.1.0"
+  }
+}

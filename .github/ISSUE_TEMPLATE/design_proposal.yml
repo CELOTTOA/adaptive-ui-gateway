@@ -1,0 +1,26 @@
+name: Design proposal
+description: Discuss an architectural question, adapter or evaluation
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or research question
+      description: Who benefits, and what evidence would help decide?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed approach and alternatives
+    validations:
+      required: true
+  - type: textarea
+    id: boundaries
+    attributes:
+      label: Impact on data, permissions and host compatibility
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Smallest useful result and how to verify it

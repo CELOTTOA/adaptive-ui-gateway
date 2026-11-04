@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "references": [
+    { "path": "../../packages/core" },
+    { "path": "../../packages/ui-planner" },
+    { "path": "../gateway-server" },
+    { "path": "../../examples/customer-api" }
+  ],
+  "include": ["src/**/*.ts"]
+}

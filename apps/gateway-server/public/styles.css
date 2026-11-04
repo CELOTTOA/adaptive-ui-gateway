@@ -1,0 +1,92 @@
+:root {
+  color-scheme: light;
+  font-family: system-ui, sans-serif;
+  color: #17211b;
+  background: #f4f6f3;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  width: min(960px, calc(100% - 2rem));
+  margin: 3rem auto;
+}
+
+section {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: #ffffff;
+  border: 1px solid #d8dfd9;
+  border-radius: 0.75rem;
+}
+
+label {
+  display: block;
+  margin-top: 1rem;
+  margin-bottom: 0.35rem;
+  font-weight: 600;
+}
+
+input {
+  box-sizing: border-box;
+  width: min(100%, 28rem);
+  padding: 0.65rem;
+  border: 1px solid #8c9990;
+  border-radius: 0.35rem;
+  font: inherit;
+}
+
+button {
+  margin: 1rem 1rem 0 0;
+  padding: 0.65rem 1rem;
+  border: 0;
+  border-radius: 0.35rem;
+  color: #ffffff;
+  background: #145d3a;
+  font: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+table {
+  width: 100%;
+  margin-top: 1.5rem;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 0.65rem;
+  border-bottom: 1px solid #d8dfd9;
+  text-align: left;
+}
+
+.eyebrow {
+  color: #145d3a;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.aug-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1rem;
+  align-items: end;
+}
+
+.aug-controls label input {
+  display: block;
+  margin-top: 0.35rem;
+  font-weight: 400;
+}
+
+.aug-table-wrap {
+  overflow-x: auto;
+}

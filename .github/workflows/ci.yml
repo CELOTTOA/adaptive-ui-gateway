@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      live:
+        description: "Also run live model-provider tests (uses the GROK_API_KEY secret)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Protected gates (${{ matrix.os }}, Node ${{ matrix.node }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [22, 24]
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci
+      # Builds every package, then runs contract and integration tests.
+      # Live tests are skipped here because no API key is provided.
+      - run: npm test
+      - run: npm run smoke:demo
+      - run: npm run check:publication
+      - name: Audit production dependencies
+        if: matrix.os == 'ubuntu-latest' && matrix.node == 24
+        run: npm audit --omit=dev --audit-level=high
+
+  live:
+    name: Live model provider (manual)
+    if: github.event_name == 'workflow_dispatch' && inputs.live
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run test:live
+        env:
+          GROK_API_KEY: ${{ secrets.GROK_API_KEY }}

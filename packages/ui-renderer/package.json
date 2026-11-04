@@ -1,0 +1,10 @@
+{
+  "name": "@aug/ui-renderer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Fixed browser renderer for validated AUG UI Plans, shared by all hosts",
+  "exports": {
+    "./plan-renderer.js": "./src/plan-renderer.js"
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "openapi": "3.0.3",
+  "info": { "title": "Archteathos read adapter", "version": "0.1.0" },
+  "paths": {
+    "/theatres": {
+      "get": {
+        "operationId": "searchTheatres",
+        "summary": "Archteathos — ricerca teatri",
+        "description": "Cerca teatri per nome o codice. Misure in metri tratte esclusivamente da rilevati, senza completamento delle quote mancanti. La vista non esprime un verdetto di fattibilità. La fonte rimane visibile.",
+        "x-aug-id": "archteathos.theatres.search",
+        "x-aug-effect": "read",
+        "x-aug-classification": "internal",
+        "x-aug-required-scopes": ["theatres:read"],
+        "parameters": [
+          { "name": "q", "in": "query", "schema": { "type": "string", "maxLength": 200 } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 100 } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Schede dei teatri, campi autorizzati e quote dichiarate",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Theatre" } }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Theatre": {
+        "type": "object",
+        "properties": {
+          "codice": { "type": "string", "x-aug-classification": "internal" },
+          "nome": { "type": "string", "x-aug-classification": "internal" },
+          "boccascenaLarghezzaMetri": { "type": "number", "nullable": true, "x-aug-classification": "internal" },
+          "boccascenaAltezzaMetri": { "type": "number", "nullable": true, "x-aug-classification": "internal" },
+          "palcoProfonditaMetri": { "type": "number", "nullable": true, "x-aug-classification": "internal" },
+          "capienza": { "type": "integer", "nullable": true, "x-aug-classification": "internal" },
+          "provenienza": { "type": "string", "x-aug-classification": "internal" },
+          "fonte": { "type": "string", "x-aug-classification": "internal" }
+        }
+      }
+    }
+  }
+}

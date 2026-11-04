@@ -1,0 +1,14 @@
+# Local Codex host in ChatGPT Desktop. Merge this section into the MCP config;
+# keep existing servers and settings. The GUI also accepts these command/args.
+# HTTPS PROFILE ON HOLD: the current .local keypair inherited broad workspace ACLs.
+# Do not activate these TLS settings until safe storage and a new keypair are reviewed.
+[mcp_servers.aug]
+command = 'C:\Program Files\nodejs\node.exe'
+args = ['C:\adaptive-ui-gateway\apps\mcp-apps-server\dist\main.js']
+cwd = 'C:\adaptive-ui-gateway'
+
+# A new public localhost certificate requires separate review before trust/activation.
+# The key stays on disk in the ignored .local directory; it is never sent to MCP.
+[mcp_servers.aug.env]
+AUG_GATEWAY_TLS_CERT = 'C:\adaptive-ui-gateway\.local\tls\aug-localhost.cert.pem'
+AUG_GATEWAY_TLS_KEY = 'C:\adaptive-ui-gateway\.local\tls\aug-localhost.key.pem'

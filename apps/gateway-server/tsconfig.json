@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  },
+  "references": [
+    { "path": "../../packages/core" },
+    { "path": "../../packages/capability-catalog" },
+    { "path": "../../packages/discovery-openapi" },
+    { "path": "../../packages/security" },
+    { "path": "../../packages/ui-planner" },
+    { "path": "../../packages/model-provider-xai" },
+    { "path": "../../packages/ui-schema" },
+    { "path": "../../examples/customer-api" }
+  ],
+  "include": ["src/**/*.ts"]
+}
