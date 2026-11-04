@@ -26,6 +26,8 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -35,7 +37,7 @@ jobs:
       # Live tests are skipped here because no API key is provided.
       - run: npm test
       - run: npm run smoke:demo
-      - run: npm run check:publication
+      - run: npm run check:publication -- --history
       - name: Audit production dependencies
         if: matrix.os == 'ubuntu-latest' && matrix.node == 24
         run: npm audit --omit=dev --audit-level=high

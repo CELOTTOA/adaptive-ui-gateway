@@ -14,7 +14,8 @@ const patterns = [
 ];
 const privateKey = /-----BEGIN (?:[A-Z0-9]+ )*PRIVATE KEY-----/;
 const fixturePath = "tests/fixtures/tls/test-only.key.pem";
-const fixture = await readFile(resolve(root, fixturePath), "utf8");
+const normalizeLines = (content) => content.replaceAll("\r\n", "\n");
+const fixture = normalizeLines(await readFile(resolve(root, fixturePath), "utf8"));
 // Exact known local credential values are compared in memory, never printed.
 let knownSecrets = [];
 try {
@@ -30,7 +31,7 @@ function scan(label, content, allowFixture = false) {
   for (const [name, pattern] of patterns) {
     if (pattern.test(content)) failures.push(`${label}: ${name}`);
   }
-  if (privateKey.test(content) && !(allowFixture && content === fixture)) {
+  if (privateKey.test(content) && !(allowFixture && normalizeLines(content) === fixture)) {
     failures.push(`${label}: unapproved private key`);
   }
   if (knownSecrets.some((secret) => content.includes(secret))) failures.push(`${label}: matches a local secret`);

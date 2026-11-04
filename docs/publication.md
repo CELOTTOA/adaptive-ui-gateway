@@ -9,7 +9,7 @@ read-only UI planning with a separate authorized data channel. The API-key-free 
 demo is the supported first experience. Archteathos is an optional external-checkout adapter.
 The license is MIT, attributed to DevSoftIQ and contributors as identified by the project RFC.
 
-The GitHub repository is [CELOTTOA/adaptive-ui-gateway](https://github.com/CELOTTOA/adaptive-ui-gateway),
+The public GitHub repository is [CELOTTOA/adaptive-ui-gateway](https://github.com/CELOTTOA/adaptive-ui-gateway),
 matching the authenticated maintainer account. It was first created privately for validation.
 The initial source snapshot is commit `228206afca72f27e8e8043e180785c8393ad7f01`,
 authored with the maintainer's GitHub noreply address. The original repository/history
@@ -50,6 +50,12 @@ The initial publication source has no `.envlocal`, working TLS key, installed de
 generated build, unreviewed artwork or original Git history. The public TLS test fixture
 is intentional and is not a credential for any operational endpoint.
 
+The repository was made public after the initial four-platform checks. GitHub private
+vulnerability reporting, secret scanning and secret push protection were enabled and verified.
+The final publication-history check exposed a Windows CRLF/Git LF mismatch for the deliberately
+public TLS fixture; fixture comparison now normalizes line endings while retaining the exact
+path/content exception. CI fetches full history and runs the historical check as well.
+
 ## Intentional open items
 
 The live ChatGPT HTTPS path, certificate lifecycle, independent real-host context checks,
@@ -57,6 +63,6 @@ AI-layout usefulness evaluation and production identity are not release claims. 
 contribution briefs are linked from [the roadmap](roadmap.md). No certificate trust-store
 or real-user desktop configuration change belongs to this publication task.
 
-Before public release, enable and verify GitHub private vulnerability reporting. Do not post
+Private vulnerability reporting is enabled. Do not post
 the draft community briefs as public messages automatically; they remain reviewable issue
 seeds in the repository. Hosting documentation/source is distinct from deploying a data gateway.
