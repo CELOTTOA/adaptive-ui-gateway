@@ -4,6 +4,14 @@
 
 **Ultimo aggiornamento locale:** 4 novembre 2026. Correzioni successive a `54c7888` non ancora committate.
 
+**Preparazione pubblica v0.1:** README e guide in inglese, licenza MIT, policy di sicurezza,
+contributi e sei proposte di lavoro sono pronti. Uno snapshot separato, senza la cronologia
+originale o configurazioni locali, è stato caricato in
+[CELOTTOA/adaptive-ui-gateway](https://github.com/CELOTTOA/adaptive-ui-gateway).
+La [prima CI reale](https://github.com/CELOTTOA/adaptive-ui-gateway/actions/runs/41847411105)
+ha superato tutti i job Windows/Linux con Node 22/24, inclusi smoke demo e controlli di
+pubblicazione. [Resoconto e limiti](../publication.md).
+
 ## In sintesi
 
 AUG genera interfacce dichiarative a partire dalle capability di un backend esistente. Lo fa in

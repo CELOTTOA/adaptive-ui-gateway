@@ -9,9 +9,11 @@ read-only UI planning with a separate authorized data channel. The API-key-free 
 demo is the supported first experience. Archteathos is an optional external-checkout adapter.
 The license is MIT, attributed to DevSoftIQ and contributors as identified by the project RFC.
 
-The initial GitHub destination is `CELOTTOA/adaptive-ui-gateway`, matching the authenticated
-maintainer account. A remote repository, CI run or public release is not considered completed
-until its actual URL and result have been recorded below.
+The GitHub repository is [CELOTTOA/adaptive-ui-gateway](https://github.com/CELOTTOA/adaptive-ui-gateway),
+matching the authenticated maintainer account. It was first created privately for validation.
+The initial source snapshot is commit `228206afca72f27e8e8043e180785c8393ad7f01`,
+authored with the maintainer's GitHub noreply address. The original repository/history
+remains separate and unchanged; it was not pushed to GitHub.
 
 ## Source snapshot
 
@@ -34,8 +36,19 @@ the registry. Check the GitHub matrix rather than representing a configured work
 - Working tree: `npm test` passed 76 tests, skipped 3 opt-in live tests, failed 0 (79 total).
 - Separate Archteathos backend run: 10 passed, with 13 source sheets retrieved over HTTP.
 - Production dependency audit: 0 known vulnerabilities reported by the npm registry.
-- Initial targeted publication scan: 105 source files and 95 historical text blobs passed.
-- Clean snapshot installation, startup and remote CI: pending final candidate verification.
+- Targeted publication scan before the final documentation update: 107 source files and
+  95 historical text blobs passed. No configured local-secret matches were found.
+- Clean snapshot: fresh dependency installation, the same 76 passed / 3 skipped tests,
+  publication checks and the actual deterministic demo-launcher smoke all succeeded.
+- [GitHub CI run 41847411105](https://github.com/CELOTTOA/adaptive-ui-gateway/actions/runs/41847411105)
+  passed all four Windows/Linux × Node 22/24 jobs. Each installed from the lockfile, built,
+  tested, launched the demo on free ports and checked publication files. The production
+  dependency audit passed in the Linux Node 24 job. External provider tests were skipped.
+
+No browser interaction or real desktop HTTPS sandbox test is implied by this CI result.
+The initial publication source has no `.envlocal`, working TLS key, installed dependencies,
+generated build, unreviewed artwork or original Git history. The public TLS test fixture
+is intentional and is not a credential for any operational endpoint.
 
 ## Intentional open items
 

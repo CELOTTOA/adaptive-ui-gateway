@@ -10,7 +10,7 @@ transport. This is not a claim about every ChatGPT/Claude surface or future rele
 | ChatGPT Desktop local Codex host, build 26.1027.6604.0 | View and native origin observed; actual console reports CSP rejection of loopback HTTP | HTTP blocked in this build; HTTPS inside the real host is not yet verified |
 | Gateway HTTPS, local clients | Explicit certificate validation, CORS, plan/query and real stdio TLS tests | Implemented; fixture trust is per test connection, not an OS installation |
 | Ordinary ChatGPT chat/plugin deployment | No completed AUG deployment | Separate deployment/authentication work; do not infer support from local Codex configuration |
-| Other hosts / OS combinations | Automated CI is configured for Windows/Linux, Node 22/24 | Community reproduction requested; configured jobs are not evidence until they run |
+| Windows/Linux, Node 22/24 | All four GitHub CI jobs passed on 4 November: clean install, tests, demo-launcher smoke and publication checks | Verifies the standalone/process slice; other desktop hosts still need actual sandbox evidence |
 
 The local MCP launcher is `apps/mcp-apps-server/dist/main.js`, after `npm run build`.
 It starts the synthetic backend and a per-process loopback gateway. A new host view enrolls

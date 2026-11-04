@@ -1,5 +1,7 @@
 # Adaptive UI Gateway (AUG)
 
+[![CI](https://github.com/CELOTTOA/adaptive-ui-gateway/actions/workflows/ci.yml/badge.svg)](https://github.com/CELOTTOA/adaptive-ui-gateway/actions/workflows/ci.yml)
+
 **Generate a task interface from backend capabilities. Keep record retrieval separate from model planning.**
 
 AUG is an experimental reference implementation for developers exploring generative UI,
@@ -10,6 +12,9 @@ plan; an authenticated gateway retrieves the permitted records through a separat
 **Status: v0.1 experimental.** The working slice is read-only search and tables. This is an
 invitation to examine the design, reproduce the results and challenge the assumptions.
 It is not a production identity system or a universal backend connector.
+
+The first candidate passed CI on Windows and Linux with Node 22 and 24. See
+[the publication record](docs/publication.md) for commands, evidence and exclusions.
 
 ## The question
 
