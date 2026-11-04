@@ -74,4 +74,11 @@ codes. They do not persist events by default. This is not an external durable au
 - Extend the component contract and trusted renderer together, with relevant policy tests.
 
 Authentication in the sample launchers is a token-to-principal fixture. A remote deployment,
-write broker, generic backend CLI and persistent session store are not implemented.
+write broker and persistent session store are not implemented.
+
+The local MCP entrypoint now accepts either the default synthetic demo or a fully specified
+external backend profile. It uses the same configuration for its MCP catalog and HTTP data
+gateway, registers the configured principal's tenant, and only owns the synthetic backend's
+lifecycle. Partial external settings fail startup. The model-facing catalog includes input
+schemas, so the host can inspect parameter requirements; generation of arbitrary parameter
+forms remains separate future work. See [configuration](backend-integration.md).

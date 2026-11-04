@@ -38,7 +38,7 @@ export class ProtectedDataGateway {
 
   constructor(options: ProtectedDataGatewayOptions) {
     this.baseUrl = new URL(options.backendBaseUrl);
-    const loopback = ["127.0.0.1", "localhost", "::1"].includes(this.baseUrl.hostname);
+    const loopback = ["127.0.0.1", "localhost", "[::1]"].includes(this.baseUrl.hostname);
     if (this.baseUrl.protocol !== "https:" && !(this.baseUrl.protocol === "http:" && loopback)) {
       throw new AugError("UNSAFE_BACKEND_URL", "Backend URLs must use HTTPS or loopback HTTP", 500);
     }

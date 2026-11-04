@@ -103,7 +103,7 @@ For the actual renderer and request path, see [the walkthrough](docs/demo-walkth
 | Validation | Component schema, field policies, binding policies and action references |
 | Data access | Authenticated plan sessions, tenant/scope checks, allowed fields, bounded rows |
 | Rendering | Heading, text input, button, table and status; fixed code using text nodes |
-| MCP Apps | Local stdio adapter; views fetch plans and records directly from the gateway |
+| MCP Apps | One configurable local stdio entrypoint for demo or external backends; metadata-only catalog includes input schemas |
 | Tests | Contract, integration, stdio, TLS and opt-in live tests; no API key required for the main suite |
 | Second backend | Archteathos theatre sheets through a specific read-only adapter, without changing AUG core packages |
 
@@ -134,6 +134,8 @@ See [Security](SECURITY.md), [the threat model](docs/security-model.md) and
 
 Start with [the backend integration guide](docs/backend-integration.md) and
 [the synthetic API's OpenAPI document](examples/customer-api/openapi.json).
+The MCP entrypoint accepts a dedicated `AUG_ENV_FILE` profile containing the OpenAPI path,
+backend URL, separate service/view tokens and explicit principal, tenant and scopes.
 The core is available as `GatewayService` and `startGatewayServer` inside this monorepo.
 It is not published as an npm package.
 

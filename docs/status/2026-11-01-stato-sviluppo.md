@@ -4,6 +4,17 @@
 
 **Ultimo aggiornamento locale:** 4 novembre 2026. Correzioni successive a `54c7888` non ancora committate.
 
+**Avvio MCP configurabile — 4 novembre:** lo stesso `main.js` collega ora la demo clienti
+oppure un backend esterno tramite OpenAPI, URL, credenziali distinte e identità esplicita.
+`AUG_ENV_FILE` seleziona un profilo isolato; configurazioni esterne incomplete falliscono
+senza fallback demo. Il catalogo MCP include gli schemi degli input. Archteathos ha un
+servizio separato (`npm run backend:archteathos`) che genera un profilo locale ignorato da
+Git; nessuna configurazione host è modificata. Suite: **83 superati, 4 opzionali saltati,
+0 falliti (87 totali)**. Collaudo Archteathos separato: **11/11 superati**, incluso STDIO
+reale con lo stesso entrypoint. Non sono ancora implementati moduli di input generici o
+chiamate al motore di fattibilità. Il blocco CSP ChatGPT e la scelta del certificato restano
+aperti. [Configurazione](../backend-integration.md).
+
 **Preparazione pubblica v0.1:** README e guide in inglese, licenza MIT, policy di sicurezza,
 contributi e sei proposte di lavoro sono pronti. Uno snapshot separato, senza la cronologia
 originale o configurazioni locali, è stato caricato in
@@ -25,9 +36,9 @@ Ad oggi:
 - Il commit `54c7888` sostituisce il trasporto dei record tramite `_meta` con un **canale HTTP
   diretto tra vista e gateway**. Il tool MCP dei dati è stato eliminato: non è soltanto nascosto
   al modello.
-- Build e suite ordinaria: **79 test totali, 76 superati e 3 live saltati**, oltre a una CI
+- Build e suite ordinaria: **87 test totali, 83 superati e 4 opzionali saltati**, oltre a una CI
   pronta per GitHub. Il test opt-in del backend Archteathos è stato eseguito separatamente:
-  **10/10 superati**, con HTTP reale e le 13 schede del repository esistente.
+  **11/11 superati**, con HTTP reale, STDIO configurabile e le 13 schede del repository esistente.
 - **Secondo backend provato: Archteathos.** Un adattatore read-only specifico espone ricerca
   teatri e misure dichiarate, con fonte e quote mancanti preservate. Nessuna modifica al
   repository Archteathos o ai package core AUG. La demo standalone legge ora la capability

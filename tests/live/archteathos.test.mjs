@@ -7,8 +7,59 @@ import { ModelAssistedUiPlanner } from "@aug/ui-planner";
 import { RecordingModelProvider } from "../helpers/recording-model-provider.mjs";
 import { startArchteathosDemo, capabilityId, tenantId } from "../../examples/archteathos/demo.mjs";
 import { theatreRow } from "../../examples/archteathos/adapter.mjs";
+import { startArchteathosBackend, openApiFile } from "../../examples/archteathos/backend.mjs";
+import { fileURLToPath } from "node:url";
+import { Client } from "@modelcontextprotocol/client";
+import { StdioClientTransport } from "@modelcontextprotocol/client/stdio";
+import { searchViewUri, toolNames } from "@aug/mcp-apps-server";
 
 const root = process.env.ARCHTEATHOS_ROOT;
+
+test("Archteathos connects through the same configurable MCP entrypoint as the default demo", {
+  skip: !root && "Set ARCHTEATHOS_ROOT to the existing checkout", timeout: 20_000,
+}, async (t) => {
+  const backend = await startArchteathosBackend({ root });
+  t.after(() => backend.close());
+  const accessToken = "archteathos-mcp-test-view-token";
+  const env = { ...Object.fromEntries(Object.entries(process.env).filter(([key]) => !key.startsWith("AUG_"))),
+    AUG_ENV_FILE: "", GROK_API_KEY: "", AUG_OPENAPI_FILE: openApiFile,
+    AUG_BACKEND_URL: backend.adapterUrl, AUG_BACKEND_TOKEN: backend.backendToken, AUG_ACCESS_TOKEN: accessToken,
+    AUG_PRINCIPAL_ID: "archteathos-reader", AUG_TENANT_ID: tenantId, AUG_SCOPES: "theatres:read" };
+  const transport = new StdioClientTransport({ command: process.execPath,
+    args: [fileURLToPath(new URL("../../apps/mcp-apps-server/dist/main.js", import.meta.url))], env, stderr: "pipe" });
+  let diagnostics = "";
+  transport.stderr.on("data", (chunk) => { diagnostics += chunk; });
+  const client = new Client({ name: "archteathos-test-host", version: "0.0.0" });
+  t.after(() => client.close());
+  await client.connect(transport);
+  const catalog = await client.callTool({ name: toolNames.listCapabilities, arguments: {} });
+  assert.deepEqual(catalog.structuredContent.capabilities.map((item) => item.id), [capabilityId]);
+  assert.equal(catalog.structuredContent.capabilities[0].inputSchema.properties.q.type, "string");
+  assert.equal(backend.stats.sourceRequests, 0);
+  const view = await client.callTool({ name: toolNames.createView,
+    arguments: { intent: "Cerca una sala per nome o codice", capabilityId } });
+  const resource = await client.readResource({ uri: searchViewUri });
+  const [gateway] = resource.contents[0]._meta.ui.csp.connectDomains;
+  const headers = { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json", Origin: "null" };
+  const created = await fetch(`${gateway}/v1/plans`, { method: "POST", headers,
+    body: JSON.stringify(view.structuredContent.view) });
+  assert.equal(created.status, 201);
+  const plan = await created.json();
+  const queried = await fetch(`${gateway}/v1/data/query`, { method: "POST", headers,
+    body: JSON.stringify({ planId: plan.planId, actionId: "query-data", state: { filters: { q: "Bolzano" } } }) });
+  assert.equal(queried.status, 200);
+  const { rows } = await queried.json();
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].codice, "GM-07");
+  assert.equal(rows[0].boccascenaLarghezzaMetri, 12);
+  assert.equal(backend.stats.sourceRequests, backend.files.length);
+  const channel = JSON.stringify({ catalog, view, resource }) + diagnostics;
+  for (const value of [accessToken, backend.backendToken, rows[0].nome, rows[0].fonte]) {
+    assert.equal(channel.includes(value), false);
+  }
+  await client.close();
+  assert.equal((await fetch(`${backend.adapterUrl}/theatres`)).status, 401, "the external backend must remain running");
+});
 
 test("Archteathos adapter never substitutes estimates for missing declared measurements", () => {
   const row = theatreRow({

@@ -59,8 +59,10 @@ Do not put record values into intent or metadata just because retrieval uses a s
 
 For local stdio hosts, build first and run
 `node /absolute/path/to/adaptive-ui-gateway/apps/mcp-apps-server/dist/main.js`.
-The entrypoint currently starts the synthetic customer backend. Its stdout is MCP-only;
-diagnostics are written to stderr. The demo access token is `demo-analyst-token`.
+The entrypoint defaults to the synthetic customer backend and accepts an
+[external backend configuration](backend-integration.md). Its stdout is MCP-only;
+diagnostics go to stderr. The demo token is `demo-analyst-token`; external profiles
+use `AUG_ACCESS_TOKEN`.
 Use host-specific configuration only after reading [compatibility](compatibility.md).
 
 Archteathos is optional and requires a separate checkout. Follow

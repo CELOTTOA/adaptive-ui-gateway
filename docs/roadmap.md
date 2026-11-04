@@ -12,6 +12,10 @@ every feature in the original RFC. Prefer evidence and small changes over expand
 
 ## Next investigations
 
+The local MCP entrypoint now connects external backends through configuration, with explicit
+identity/credentials and input schemas in its metadata catalog. The same process is tested
+against both the default demo and the separate Archteathos read adapter.
+
 | Question | Useful result |
 |---|---|
 | Does model planning improve a task? | A small, reproducible comparison with deterministic and hand-built layouts, with latency/cost and failures |

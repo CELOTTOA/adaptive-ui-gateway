@@ -15,6 +15,7 @@
     "test": "npm run build && node --test tests/**/*.test.mjs",
     "demo": "npm run build && node --env-file-if-exists=.envlocal apps/gateway-server/dist/demo.js",
     "demo:archteathos": "npm run build && node examples/archteathos/demo.mjs",
+    "backend:archteathos": "node examples/archteathos/backend.mjs",
     "test:archteathos": "npm run build && node --test tests/live/archteathos.test.mjs",
     "check:publication": "node scripts/check-publication.mjs",
     "smoke:demo": "node scripts/smoke-demo.mjs",

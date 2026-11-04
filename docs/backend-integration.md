@@ -1,8 +1,52 @@
 # Connecting a backend
 
 The current integration contract is a configured backend origin plus an annotated OpenAPI
-3.x document. The sample MCP launcher is wired to the synthetic backend; the core and HTTP
-server can be composed independently inside the monorepo.
+3.x document. The MCP launcher uses the synthetic backend by default and accepts an external
+backend configuration. The core and HTTP server can also be composed independently.
+
+## Use the same MCP launcher with your backend
+
+Build with `npm run build`. Configure these variables for the local
+`apps/mcp-apps-server/dist/main.js` process, directly or in a dedicated local env file:
+
+| Variable | Purpose |
+|---|---|
+| `AUG_OPENAPI_FILE` | Annotated OpenAPI file; preferably an absolute path |
+| `AUG_BACKEND_URL` | Base URL: HTTPS or loopback HTTP; an API path prefix is allowed |
+| `AUG_BACKEND_TOKEN` | Server-to-backend Bearer credential |
+| `AUG_ACCESS_TOKEN` | A different token entered by the user in the protected view |
+| `AUG_PRINCIPAL_ID` | Explicit local principal ID |
+| `AUG_TENANT_ID` | Explicit tenant ID registered for this instance |
+| `AUG_SCOPES` | Comma-separated scopes; an explicit empty string grants none |
+
+The tokens must be distinct, 16–8192 characters and contain no line breaks. The service
+token stays server-side; neither token is supplied by MCP arguments or returned in tool
+results. The backend must validate its own service/tenant authorization. This is local
+token-to-principal configuration, not remote OAuth or a production identity system.
+
+Run the same entrypoint used by the default demo:
+
+```sh
+node /absolute/path/to/adaptive-ui-gateway/apps/mcp-apps-server/dist/main.js
+```
+
+`AUG_ENV_FILE` selects an env file (absolute paths recommended); an empty value disables
+env-file loading. Without it, the launcher optionally loads the repository's `.envlocal`.
+Existing environment values take precedence. Relative schema paths resolve from the
+process working directory, including when settings came from an env file.
+
+Any configured backend setting selects external mode and requires the complete configuration.
+Missing identity, invalid URLs, unreadable documents or missing credentials fail startup;
+they do not silently select the demo. AUG neither starts nor stops the external service.
+The default `demo-analyst-token` is not accepted unless explicitly configured as the view
+token. No backend settings preserves the synthetic demo.
+
+The model-facing catalog includes authorized input schemas and visible field names. It
+excludes records, backend bindings and configured credentials. Keep sensitive values out
+of schema defaults/examples and other metadata as well as intent text.
+
+See [Archteathos](../examples/archteathos/README.md) for a running backend and generated
+profile using this same entrypoint. [Host compatibility limits](compatibility.md) still apply.
 
 ## Smallest compatible operation
 

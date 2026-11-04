@@ -15,6 +15,8 @@ import type { ViewOriginRegistry } from "./view-origins.js";
 import { viewOriginPattern } from "./view-origins.js";
 
 export { principalFromEnv } from "./principal.js";
+export { backendConfigFromEnv } from "./backend-config.js";
+export type { McpBackendConfig } from "./backend-config.js";
 export { ViewOriginRegistry, viewOriginPattern } from "./view-origins.js";
 
 export const searchViewUri = "ui://aug/search-view.html";
@@ -107,7 +109,7 @@ export async function createAugMcpServer(options: AugMcpServerOptions): Promise<
       title: "List AUG capabilities",
       description:
         "Lists read-only data capabilities the user may open as an interactive search view. " +
-        "Returns metadata only (no records).",
+        "Returns authorized input schemas and visible field names only (no records).",
       inputSchema: z.object({}),
       annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
     },
@@ -116,6 +118,7 @@ export async function createAugMcpServer(options: AugMcpServerOptions): Promise<
         id: capability.id,
         title: capability.title,
         description: capability.description,
+        inputSchema: capability.inputSchema,
         fields: capability.fields,
       }));
       return {
