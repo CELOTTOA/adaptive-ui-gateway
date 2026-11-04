@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/CELOTTOA/adaptive-ui-gateway/actions/workflows/ci.yml/badge.svg)](https://github.com/CELOTTOA/adaptive-ui-gateway/actions/workflows/ci.yml)
 
-**Generate a task interface from backend capabilities. Keep record retrieval separate from model planning.**
+**Explore AI chats as a common frontend for existing software.**
 
 AUG is an experimental reference implementation for developers exploring generative UI,
 backend integration and data access boundaries. It turns an explicitly annotated OpenAPI
@@ -13,13 +13,40 @@ plan; an authenticated gateway retrieves the permitted records through a separat
 invitation to examine the design, reproduce the results and challenge the assumptions.
 It is not a production identity system or a universal backend connector.
 
+## Why AUG exists
+
+AUG began with a reflection on how people access information. Search engines such as
+Google became a familiar place to look for answers. The hypothesis is that AI conversations,
+with systems such as ChatGPT and Claude, could also become a common starting point for
+using software. A user could describe an objective, discover the relevant application
+capabilities and work through the task with an interface composed for that moment.
+
+Today, using several applications often means learning several frontends: their navigation,
+terminology and workflows. The question behind AUG is whether a familiar AI chat could
+provide a common interaction layer, with tables, selections and other controls appearing
+when the task needs them.
+
+In that vision, existing applications continue to provide their domain logic, calculations,
+business rules and authorization. They expose capabilities that an AI-facing layer can
+help users access. For software developers, this could offer an additional way to make
+their applications useful through the conversational environments people already use.
+
+The long-term question is: **can someone use an application they have never learned by
+describing what they want to accomplish in an AI chat?** A further step would be completing
+a task across several applications through that same interaction layer. Specialized
+interfaces would still have a role in intensive work and tasks requiring precise control.
+
+This is a direction to investigate, not a forecast established by the prototype.
+Cross-application orchestration and general intent-driven workflows are not implemented.
+
+## From vision to a first experiment
+
 The first candidate passed CI on Windows and Linux with Node 22 and 24. See
 [the publication record](docs/publication.md) for commands, evidence and exclusions.
 
-## The question
-
-Can an AI model help design useful interfaces from authorized capability metadata, while
-record values are fetched only when the user interacts with the resulting interface?
+The current experiment addresses one part of that vision: can an AI model help design
+useful interfaces from authorized capability metadata, while record values are fetched
+only when the user interacts with the resulting interface?
 
 AUG implements that separation, including a deterministic planner for a reproducible
 baseline. Whether a model improves usability enough to justify its cost and latency remains
