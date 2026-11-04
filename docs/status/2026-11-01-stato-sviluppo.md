@@ -1,8 +1,32 @@
 # Adaptive UI Gateway: stato dello sviluppo
 
-**Data:** 1 novembre 2026 · **Branch:** `main` @ `54c7888` · **Spec di riferimento:** `adaptive-ui-gateway-architecture-spec-v0.3.md`
+**Documento avviato:** 1 novembre 2026 · **Spec di riferimento:** `adaptive-ui-gateway-architecture-spec-v0.3.md`
 
-**Ultimo aggiornamento locale:** 4 novembre 2026. Correzioni successive a `54c7888` non ancora committate.
+**Ultimo aggiornamento locale:** 4 novembre 2026, dopo pubblicazione e verifica dell'avvio MCP configurabile.
+
+**Base codice locale:** `main` @ `b706a39` · **Base codice pubblica:** `main` @ `f638ebf`.
+Le due cronologie sono separate; i sorgenti verificati corrispondono. Gli hash indicano
+la base codice verificata prima di questo aggiornamento documentale.
+
+## Visione e decisione corrente
+
+> Ogni nuovo software dovrebbe poter essere utilizzato attraverso una chat AI, senza
+> richiedere all'utente di imparare un nuovo frontend.
+
+AUG esplora un collegamento riutilizzabile tra backend esistenti e chat AI: le applicazioni
+mantengono logica di dominio, regole e autorizzazioni; la chat diventa il punto di accesso
+alle loro capacità e presenta controlli visivi quando servono al compito. Il titolo del
+README pubblico esprime questa visione in inglese.
+
+Il prototipo verifica una parte di questa direzione: capability dichiarate, viste read-only,
+piani validati e recupero autorizzato separato dal modello. Non realizza ancora un frontend
+conversazionale universale, l'esecuzione di compiti tra applicazioni o l'intero workflow
+di Archteathos. Il criterio futuro è permettere a una persona di usare un'applicazione che
+non conosce descrivendo il proprio obiettivo, oltre alla qualità del layout generato.
+
+**Decisione condivisa:** la base attuale è sufficiente per lo sviluppo da parte di terzi.
+Si privilegiano ora riproduzioni indipendenti e primi riscontri della community. Le estensioni
+descritte nei prossimi passi restano possibilità da valutare, non lavoro avviato automaticamente.
 
 **Avvio MCP configurabile — 4 novembre:** lo stesso `main.js` collega ora la demo clienti
 oppure un backend esterno tramite OpenAPI, URL, credenziali distinte e identità esplicita.
@@ -23,25 +47,63 @@ La [prima CI reale](https://github.com/CELOTTOA/adaptive-ui-gateway/actions/runs
 ha superato tutti i job Windows/Linux con Node 22/24, inclusi smoke demo e controlli di
 pubblicazione. [Resoconto e limiti](../publication.md).
 
+## Pubblicazione e verifica più recente
+
+| Elemento | Stato verificato |
+|---|---|
+| Repository | [CELOTTOA/adaptive-ui-gateway](https://github.com/CELOTTOA/adaptive-ui-gateway), pubblico, licenza MIT |
+| Prerelease | [v0.1.0-experimental.1](https://github.com/CELOTTOA/adaptive-ui-gateway/releases/tag/v0.1.0-experimental.1), commit `fac89e9`; le successive modifiche all'avvio MCP sono su `main`, documentate in `CHANGELOG.md` come Unreleased |
+| Ultima CI verificata | [Run 41869406758](https://github.com/CELOTTOA/adaptive-ui-gateway/actions/runs/41869406758), commit `f638ebf`, tutti e quattro i job Windows/Linux × Node 22/24 riusciti |
+| Suite ordinaria | 83 superati, 4 opzionali saltati, 0 falliti; 87 totali, build inclusa |
+| Backend Archteathos | 11/11 superati separatamente, incluse le 13 schede esistenti e il processo MCP reale |
+| Avvio demo | `npm run smoke:demo` riuscito: processo reale senza API key, catalogo, piano, query e accessi negati |
+| Controlli di pubblicazione | Link locali, pattern selezionati di credenziali, confronto con segreti locali e cronologia verificati; non equivalgono a un audit completo |
+| Funzioni GitHub | Issue e Discussions disponibili; segnalazione privata delle vulnerabilità, secret scanning e push protection attivati e verificati alla pubblicazione |
+| Contributi | `CONTRIBUTING.md`, template issue/PR e sei proposte in `docs/community/`; queste ultime sono documenti, non issue già aperte |
+
+La verifica delle dipendenze di produzione è riuscita anche nella CI più recente. I test
+provider live restano opzionali e non sono stati eseguiti in questa ultima sessione.
+
+## Copie di lavoro e profili locali
+
+- La cartella di sviluppo è `C:\adaptive-ui-gateway`, con cronologia originale conservata.
+- La copia collegata a `origin` pubblico è `.local/publication/v0.1.0-review`; la pubblicazione
+  iniziale ha usato uno snapshot selezionato, senza segreti o cronologia personale. Per future
+  pubblicazioni sincronizzare solo i sorgenti revisionati; non spingere accidentalmente la
+  cronologia originale nel repository pubblico.
+- `.local/publication/final-manifest.json` identifica lo snapshot della **prima prerelease**
+  (`fac89e9`), non le modifiche successive a `main` o il presente aggiornamento documentale.
+- Il comando `npm run backend:archteathos` ha generato `.local/archteathos/mcp-620.env` e il
+  profilo è stato verificato: stesso launcher MCP, capability teatri, piano 201 e query 200
+  con una riga autorizzata per Bolzano. Le credenziali sono temporanee: verificare che il
+  relativo backend sia ancora attivo prima di riutilizzarle; in caso contrario rigenerare.
+- Frammenti pronti, non applicati alle app: `.local/archteathos/claude-desktop.fragment.json`
+  e `.local/archteathos/codex-config.fragment.toml`. Contengono il riferimento al profilo.
+  Nessuna configurazione reale di Claude/ChatGPT è stata modificata.
+- Profili e materiale TLS operativo restano esclusi da Git. Non riportare token in questo
+  documento. Il flag Unix `0600` non dimostra ACL privati su Windows.
+
 ## In sintesi
 
-AUG genera interfacce dichiarative a partire dalle capability di un backend esistente. Lo fa in
+AUG collega capacità di backend esistenti a interazioni nelle chat AI. La slice attuale genera
+interfacce dichiarative per ricerca e tabelle. Lo fa in
 modalità **Protected**: il modello progetta l'interfaccia senza vedere i dati, che arrivano solo
 alla vista attraverso un canale autorizzato separato dal protocollo MCP.
 
 Ad oggi:
 
-- Il **planner con modello AI** è operativo con un provider reale (xAI Grok) e resta sicuro anche
-  quando il modello sbaglia o viene manipolato: in quei casi si passa al planner deterministico.
+- Il **planner con modello AI** è stato verificato con un provider reale (xAI Grok). I test
+  coprono rifiuto delle proposte non ammesse e fallback deterministico; non sono una prova
+  generale di sicurezza o un audit indipendente.
 - Il commit `54c7888` sostituisce il trasporto dei record tramite `_meta` con un **canale HTTP
   diretto tra vista e gateway**. Il tool MCP dei dati è stato eliminato: non è soltanto nascosto
   al modello.
-- Build e suite ordinaria: **87 test totali, 83 superati e 4 opzionali saltati**, oltre a una CI
-  pronta per GitHub. Il test opt-in del backend Archteathos è stato eseguito separatamente:
+- Build e suite ordinaria: **87 test totali, 83 superati e 4 opzionali saltati**; la CI reale
+  è riuscita su Windows/Linux con Node 22/24. Archteathos è stato eseguito separatamente:
   **11/11 superati**, con HTTP reale, STDIO configurabile e le 13 schede del repository esistente.
 - **Secondo backend provato: Archteathos.** Un adattatore read-only specifico espone ricerca
   teatri e misure dichiarate, con fonte e quote mancanti preservate. Nessuna modifica al
-  repository Archteathos o ai package core AUG. La demo standalone legge ora la capability
+  repository Archteathos; il backend si collega attraverso la configurazione comune. La demo standalone legge la capability
   dal catalogo. [Avvio e limiti della prova](../../examples/archteathos/README.md).
 - **Il flusso diretto è riuscito dentro Claude Desktop il 3 novembre.** I log reali mostrano
   registrazione della nuova origine, preflight 204, piano Grok creato con 201 e query HTTP con
@@ -63,7 +125,8 @@ Ad oggi:
 | Gateway HTTPS | Certificati verificati, CORS, autenticazione, piano/query e processo MCP reale nei test locali | Flusso HTTPS dentro la sandbox ChatGPT non ancora verificato |
 | Certificato locale | Generato e ispezionato; rilevati ACL e proprietà non adeguati alla protezione della chiave | Discutere la soluzione; prima di qualsiasi fiducia servirebbero storage privato e una nuova chiave |
 | Fiducia Windows e configurazione utente | Nessun certificato importato; nessuna attivazione HTTPS automatica | Nessuna azione autorizzata sul certificato corrente; decisione rinviata |
-| Secondo backend: Archteathos | 13 schede reali via HTTP, piano validato, ricerca nome/codice, quote e fonte, accessi negati, esclusione valori da planner/audit | Adattatore specifico e collaudo locale; motore di fattibilità, provider reale e host MCP non provati con questo backend |
+| Secondo backend: Archteathos | 13 schede reali via HTTP, piano validato, ricerca nome/codice, quote e fonte, accessi negati, esclusione valori da planner/audit | Adattatore specifico e collaudo locale; motore di fattibilità, provider reale e sandbox desktop non provati con questo backend |
+| MCP con backend esterno | Stesso entrypoint, profili espliciti, identità/scopes, token distinti, input schema nel catalogo; inventario e Archteathos verificati con client STDIO reale | Configurazione nelle app desktop non applicata; moduli di parametri generici ancora da sviluppare |
 
 La prova ChatGPT riguarda il server MCP locale nel Codex host dell'app. L'installazione di un
 plugin per le normali chat ChatGPT resta un percorso distinto e non è stata completata.
@@ -75,7 +138,7 @@ plugin per le normali chat ChatGPT resta un percorso distinto e non è stata com
 | 0–3 | Discovery OpenAPI, catalogo, schema UI, validazione, data gateway protetto | Completate (slice read-only) |
 | 4 — AI generation | Astrazione provider, planner vincolato, fallback | Completata: provider Grok reale, fallback deterministico, timeout configurabile |
 | 5 — Host integration | Adapter MCP Apps per almeno un client | Flusso diretto riuscito su Claude; controlli modello/vista aperti. Secondo host ChatGPT fermo alla CSP HTTP e alla decisione sul certificato |
-| 6 — Open-source launch | Docs, licenza, CI, esempi, threat model | In corso: CI pronta ma non verificata su GitHub; mancano licenza e documentazione pubblica |
+| 6 — Open-source launch | Docs, licenza, CI, esempi, threat model | Prerelease sperimentale pubblicata: MIT, guide, proposte di contributo e CI reale verde; primi riscontri esterni da raccogliere |
 | Operazioni di scrittura | Action broker con conferma | Rimandate per scelta, finché i gate Protected non sono superati |
 
 ## Architettura attuale
@@ -106,6 +169,13 @@ con valore predefinito `null`, e dalla registrazione puntuale delle viste Claude
 con schema nativo `codex-sandbox://`, tramite il bridge MCP. La registrazione scambia solo
 l'origine, non credenziali, piani o record.
 
+L'avvio predefinito crea il backend clienti sintetico. In modalità esterna richiede
+`AUG_OPENAPI_FILE`, `AUG_BACKEND_URL`, `AUG_BACKEND_TOKEN`, `AUG_ACCESS_TOKEN`,
+`AUG_PRINCIPAL_ID`, `AUG_TENANT_ID` e `AUG_SCOPES`; registra il tenant del principal e
+non gestisce il ciclo di vita del servizio esterno. Token di servizio e vista devono essere
+distinti. `AUG_ENV_FILE` permette di scegliere un profilo, evitando il caricamento automatico
+di `.envlocal`; i valori già presenti nell'ambiente hanno precedenza.
+
 | Componente | Ruolo |
 |---|---|
 | `packages/core` | Tipi condivisi: capability, principal, UI Plan, errori |
@@ -121,15 +191,19 @@ l'origine, non credenziali, piani o record.
 
 ## Cosa garantisce la modalità Protected oggi
 
-**Il modello non vede i dati.** Riceve solo l'intent ripulito, titolo e descrizione con limiti
-di lunghezza, l'elenco dei campi autorizzati e i componenti disponibili. Non riceve record, ID
-interni, policy, token o lo schema grezzo dell'API.
+**AUG non invia i record ai modelli attraverso i propri canali.** Il provider del planner
+riceve intent ripulito, titolo/descrizione limitati, nomi dei campi autorizzati e contratto dei
+componenti. La chat host riceve il catalogo con ID delle capability, descrizioni, schemi degli
+input e campi visibili. Nessuno dei due percorsi riceve i record recuperati o le credenziali
+configurate. Intent e metadati possono comunque contenere informazioni sensibili inserite
+dall'utente o dall'integratore: questa separazione non le elimina. Non è una garanzia contro
+un host compromesso, screenshot o divulgazione volontaria dei risultati.
 
 **Il modello non decide i binding.** Propone solo un layout: colonne, etichette, testi. Data
 source, capability e policy li assembla il gateway, e il risultato passa comunque da
 `validateUiPlan`.
 
-**Un output sbagliato o malevolo non apre falle.** Il gateway rifiuta:
+**Controlli sulle proposte del modello.** Il gateway rifiuta:
 - JSON non valido o risposte troppo grandi;
 - campi non autorizzati;
 - markup, URL o caratteri di controllo nei testi;
@@ -172,8 +246,10 @@ contengono solo ID, nomi dei campi, conteggi e codici d'errore, mai valori.
 
 ### Test automatici (`npm test`)
 
-Ultima esecuzione sul working tree del 3 novembre: **75 superati, 2 live saltati, 0 falliti**. Anche
-`npm run build` è riuscito.
+Ultima esecuzione del 4 novembre sul codice `b706a39` / `f638ebf`: **83 superati,
+4 opzionali saltati, 0 falliti (87 totali)**. Build inclusa. Le quattro prove saltate sono
+due test live Grok e due prove che richiedono il checkout esterno Archteathos. La suite
+Archteathos è stata eseguita separatamente con `ARCHTEATHOS_ROOT`: **11/11 superati**.
 
 | Area | Test | Cosa dimostrano |
 |---|---|---|
@@ -189,6 +265,9 @@ Ultima esecuzione sul working tree del 3 novembre: **75 superati, 2 live saltati
 | Avvio stdio e TLS | 3 | Due processi reali, gateway distinti, CORS e isolamento, piano/query HTTPS, rifiuto di configurazioni TLS incomplete |
 | Gateway HTTPS | 3 | Validazione del certificato, fiducia esplicita per richiesta nei test, CORS, autenticazione e same-origin HTTPS |
 | Identità MCP | 3 | Utente da variabili d'ambiente con validazione |
+| Configurazione backend MCP | 5 | Default demo, identità esplicita, configurazioni parziali/URL/token rifiutati, coerenza loopback IPv6 |
+| Backend esterno via STDIO | 2 | Profilo env reale, prefisso API, credenziali distinte, scope negati, proiezione campi, nessun valore nel canale MCP e servizio esterno ancora attivo dopo la chiusura |
+| Archteathos | 3 voci nella suite ordinaria | Una verifica delle quote mancanti e due prove opt-in; con checkout presente il collaudo separato esegue anche otto verifiche annidate, per 11 risultati totali |
 | Live Grok (manuali) | 2 | Compatibilità reale con Grok; non rieseguiti dopo questa modifica, che non cambia il planner |
 
 I nuovi test sulle origini HTTPS ChatGPT e sullo schema nativo Codex fallivano prima delle
@@ -243,28 +322,29 @@ dal precedente trasporto `_meta` e riporta l'evidenza reale del 3 novembre.
 | Secondo host non completato | La portabilità del canale protetto non è ancora dimostrata su ChatGPT | Completare lo spike già avviato dopo la decisione sul trasporto e sul certificato |
 | Testi visibili al modello | Titolo ed etichette possono riflettere un'injection nell'OpenAPI | Già filtrati da `isSafeText` e limiti di lunghezza; valutare una lista di vocaboli ammessi |
 | Destinazione dell'audit | Oggi gli eventi vanno su stdout/stderr | Scegliere un sistema di produzione, con conservazione dei dati e controllo accessi |
-| CI non verificata su GitHub | La configurazione locale non dimostra l'esito del workflow remoto | Primo push e verifica del workflow |
-| Licenza e documentazione pubblica | Necessarie per la Fase 6 | Completare prima della pubblicazione |
-| Planner che usa poco l'intent | Con 5 componenti il valore della UI generata è limitato | Ampliare il catalogo dei componenti solo dopo i gate |
+| Credenziali dei profili locali | I file di profilo contengono token temporanei; esclusione Git e flag Unix non garantiscono ACL Windows | Usarli come profili di prova locali; progettare gestione segreti e identità prima dell'uso in produzione |
+| Interazione limitata alla ricerca | I parametri pubblicati nel catalogo non diventano ancora moduli generici o azioni di dominio | Validare un compito reale prima di ampliare componenti e operazioni |
+| Valore del planner AI | Non è ancora dimostrato un vantaggio rispetto al layout deterministico | Valutare utilità, latenza e costi; il criterio principale resta l'accesso alle capacità del backend dalla chat |
+| Adozione e collaborazione | Repository pubblico e guide non costituiscono una community attiva | Raccogliere riproduzioni, domande e primi contributi indipendenti |
 
 ## Prossimi passi consigliati
 
-1. **Discutere la soluzione del certificato.** Nessuna importazione, rigenerazione o modifica
-   alla fiducia Windows è da eseguire in questa fase. Se si sceglierà HTTPS locale, occorrerà
-   prima proteggere lo storage e generare una chiave nuova, con validità breve e nuova impronta
-   da riesaminare; il certificato corrente non è un candidato da approvare.
-2. **Solo dopo la decisione, completare lo spike ChatGPT.** Applicare la soluzione scelta e
-   verificare nella sandbox reale preflight, piano e query, senza usare il successo dei test
-   locali come prova dell'host.
-3. **Completare i controlli sul confine modello/vista su Claude.** Il canale diretto è già riuscito sull'host;
-   verificare visivamente i valori della ricerca `CANARY` e con una domanda esplicita che il
-   modello non possa citarli. Questi passaggi non sono dimostrati dal solo audit delle query.
-4. **Verificare una seconda conversazione sullo stesso host.** La registrazione delle origini
-   è coperta dai test; un ulteriore cambio reale di origine confermerà la regressione sull'host.
-5. **Completare le evidenze degli spike** prima di procedere con pubblicazione open source,
-   OAuth remoto o deployment AWS.
-6. **Solo dopo i gate Protected:** operazioni di scrittura con action broker, conferma esplicita e
-   idempotenza, come da spec.
+1. **Raccogliere le prime prove esterne.** Il repository è già pubblico e sufficiente come
+   base di sviluppo; partire da installazione pulita, backend indipendenti e revisione delle
+   scelte. Le sei proposte di contributo possono diventare issue operative.
+2. **Se si prosegue con la prossima funzionalità:** controlli derivati dagli input dichiarati,
+   con validazione lato server, e una verifica geometrica read-only di Archteathos. L'obiettivo
+   è usare una capacità del motore dalla chat; oggi sono esposte soltanto schede e misure.
+3. **Completare le evidenze sull'host Claude.** Verifica visiva dei risultati e prova esplicita
+   del contesto modello sul trasporto attuale; poi una nuova conversazione/origine reale.
+4. **Mantenere sospesa la decisione sul certificato.** Nessuna importazione, rigenerazione o
+   modifica alla fiducia Windows è richiesta da questo aggiornamento. Prima di un eventuale
+   HTTPS locale servono storage privato, nuova chiave e riesame; il certificato corrente non
+   è un candidato da installare. Solo dopo la decisione, provare HTTPS nella sandbox ChatGPT.
+5. **Valutare i problemi tecnici già documentati:** limite del corpo applicato durante lo
+   streaming, riferimenti OpenAPI ciclici e rispetto completo dei vincoli sugli input.
+6. **Scritture, OAuth remoto e deployment:** richiedono una fase distinta, identità adeguata,
+   revisione del confine dati e conferme per le operazioni che modificano lo stato.
 
 ## Cronologia
 
@@ -279,12 +359,17 @@ dal precedente trasporto `_meta` e riporta l'evidenza reale del 3 novembre.
 | `875f579` | Audit, renderer condiviso, identità MCP configurabile |
 | `448fad3` | CI GitHub Actions |
 | `54c7888` | Canale dati diretto per le viste MCP, senza record o sessioni in `_meta` |
+| `06e20c0` locale / `fac89e9` pubblico | Base della prima pubblicazione sperimentale; le cronologie locale e pubblica sono distinte |
+| `4d89371`, `f35c49f` locali / `246d8e0`, `653530b` pubblici | Visione delle chat AI come frontend e nuovo titolo del README |
+| `b706a39` locale / `f638ebf` pubblico | Avvio MCP esterno configurabile, schemi input nel catalogo, servizio Archteathos separato e test |
 
 ## Come riprodurre
 
 ```bash
 npm ci
-npm test              # 75 test locali + 2 live saltati senza chiave
+npm test              # 83 superati + 4 opzionali saltati senza key/checkout esterno
+npm run smoke:demo    # avvio del processo demo su porte libere, senza provider esterno
+npm run check:publication -- --history
 npm run test:live     # richiede GROK_API_KEY in .envlocal
 npm run demo          # demo standalone su http://127.0.0.1:4000 (token: demo-analyst-token)
 ```
@@ -293,6 +378,20 @@ Per Claude Desktop: `npm run build`, voce `aug` in `claude_desktop_config.json` 
 completo di Claude Desktop. Il processo MCP avvia il gateway diretto su una porta libera per
 istanza; la demo standalone continua a usare la porta 4000. `AUG_VIEW_ORIGINS` accetta una lista di
 origini separate da virgole e usa `null` come valore predefinito.
+
+Per il backend esterno Archteathos, in PowerShell:
+
+```powershell
+$env:ARCHTEATHOS_ROOT = 'C:\Archteathos'
+npm run test:archteathos        # 11/11 nell'ultima esecuzione
+npm run backend:archteathos    # servizio separato e nuovo profilo in .local/archteathos/
+```
+
+Configurare un server MCP separato con lo stesso `apps/mcp-apps-server/dist/main.js` e
+`AUG_ENV_FILE` uguale al nuovo percorso stampato. Inserire il token della vista soltanto
+nella vista. Il profilo è legato a quell'esecuzione del backend: non riutilizzare alla cieca
+una porta o un nome file da una sessione precedente. Vedere la guida di integrazione per
+il contratto completo e i limiti della configurazione locale.
 
 ## Correzione avvio multi-istanza — 2 novembre 2026
 
