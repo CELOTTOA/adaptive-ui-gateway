@@ -1,8 +1,8 @@
-# Adaptive UI Gateway (AUG)
+# Every new application should be usable through an AI chat, without making users learn a new frontend.
+
+**Adaptive UI Gateway (AUG)** — an experimental bridge between existing backends and AI chat frontends.
 
 [![CI](https://github.com/CELOTTOA/adaptive-ui-gateway/actions/workflows/ci.yml/badge.svg)](https://github.com/CELOTTOA/adaptive-ui-gateway/actions/workflows/ci.yml)
-
-**Explore AI chats as a common frontend for existing software.**
 
 AUG is an experimental reference implementation for developers exploring generative UI,
 backend integration and data access boundaries. It turns an explicitly annotated OpenAPI
