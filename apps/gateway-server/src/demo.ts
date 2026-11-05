@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { startCustomerApi } from "@aug/example-customer-api";
 import type { Principal } from "@aug/core";
-import { createPlannerFromEnv, startGatewayServer } from "./index.js";
+import { createPlannerFromEnv, operationStoreFromEnv, startGatewayServer } from "./index.js";
 
 const backendToken = "demo-backend-service-token";
 const principals = new Map<string, Principal>([
@@ -34,6 +34,7 @@ function port(value: string | undefined, fallback: number): number {
 }
 const gatewayPort = port(process.env.AUG_PORT, 4000);
 const backendPort = port(process.env.AUG_BACKEND_PORT, 4100);
+const operationStore = operationStoreFromEnv(process.env);
 const customerApi = await startCustomerApi({ port: backendPort, backendToken });
 const backendAddress = customerApi.address();
 if (!backendAddress || typeof backendAddress === "string") throw new Error("Backend did not start");
@@ -44,6 +45,7 @@ const gateway = await startGatewayServer({
   backendToken,
   authenticate: (token) => principals.get(token),
   ...(planner ? { planner } : {}),
+  ...(operationStore ? { operationStore } : {}),
   onAudit: (event) => console.log("audit", JSON.stringify(event)),
 }).catch((error: unknown) => {
   customerApi.close();

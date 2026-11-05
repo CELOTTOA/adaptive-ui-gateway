@@ -1,0 +1,27 @@
+{
+  "name": "@aug/protocol",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Transport-independent AUG output contracts, profiles and runtime negotiation",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./operations": {
+      "types": "./dist/operations.d.ts",
+      "import": "./dist/operations.js"
+    },
+    "./schemas/operation.json": "./src/schemas/operation.json",
+    "./schemas/invoke.json": "./src/schemas/invoke.json",
+    "./schemas/control.json": "./src/schemas/control.json",
+    "./schemas/invocation.json": "./src/schemas/invocation.json",
+    "./schemas/collection.json": "./src/schemas/collection.json",
+    "./schemas/output.json": "./src/schemas/output.json",
+    "./schemas/runtime.json": "./src/schemas/runtime.json"
+  },
+  "dependencies": {
+    "ajv": "8.20.0"
+  }
+}

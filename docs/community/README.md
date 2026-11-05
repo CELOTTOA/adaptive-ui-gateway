@@ -3,6 +3,11 @@
 These briefs can become GitHub issues after publication. They define concrete questions
 and acceptance criteria without prescribing a large redesign.
 
+These briefs originated with the read-only search prototype. The current baseline also
+includes `aug/0.2` operations, a shared runtime and optional encrypted invocation storage;
+see [the roadmap](../roadmap.md) for protocol conformance and independent implementation
+questions. Keep a brief's original search-specific scope explicit when reproducing it.
+
 | Brief | Suggested kind |
 |---|---|
 | [Reproduce the quickstart](01-reproduce-quickstart.md) | Documentation / first contribution |

@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { startCustomerApi } from "@aug/example-customer-api";
 import { startGatewayServer } from "@aug/gateway-server";
 import { ModelAssistedUiPlanner } from "@aug/ui-planner";
+import { profiles, protocolVersion } from "@aug/protocol";
 import { RecordingModelProvider } from "../helpers/recording-model-provider.mjs";
 
 const backendToken = "demo-backend-service-token";
@@ -37,6 +38,12 @@ const defaultLayout = {
 let modelResponse = () => JSON.stringify(defaultLayout);
 const provider = new RecordingModelProvider((request, options) => modelResponse(request, options));
 const plannerEvents = [];
+const protocolRuntime = {
+  protocolVersions: [protocolVersion],
+  profiles: [profiles.collection, profiles.json],
+  mediaTypes: ["application/json"],
+  deliveryKinds: ["inline"],
+};
 
 before(async () => {
   backend = await startCustomerApi({ port: 0, backendToken });
@@ -100,6 +107,76 @@ async function queryPlan(planId, token = tokens.analyst, actionId = "query-data"
     body: JSON.stringify({ planId, actionId, state: { filters: { q } } }),
   });
 }
+
+async function queryOutput(planId, runtime = protocolRuntime, options = {}) {
+  return api("/v1/aug/query", options.token ?? tokens.analyst, {
+    method: "POST",
+    headers: options.headers,
+    body: JSON.stringify({
+      planId, actionId: options.actionId ?? "query-data",
+      state: { filters: { q: options.q ?? "CANARY" } }, runtime,
+    }),
+  });
+}
+
+test("negotiated HTTP output keeps tenant projection and records on the view data plane", async () => {
+  const plan = await createPlan();
+  const { response, body } = await queryOutput(plan.body.planId);
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  assert.equal(body.protocolVersion, protocolVersion);
+  assert.equal(body.audience, "view");
+  assert.equal(body.representation.profile, profiles.collection);
+  assert.deepEqual(body.representation.audiences, ["view"]);
+  const content = body.representation.delivery.value;
+  assert.deepEqual(content.columns.map(({ key }) => key), ["id", "name", "city", "amountDue"]);
+  assert.equal(content.rows.length, 1);
+  assert.equal(content.rows[0].name, "Aurora CANARY-A-7F3A");
+  assert.doesNotMatch(JSON.stringify(body), /internalNotes|CANARY-NOTE|Borealis/);
+  assert.doesNotMatch(provider.channel(), /CANARY/);
+  assert.equal("representations" in body, false);
+});
+
+test("JSON-only runtimes receive an explicit alternative with schema preserved on empty results", async () => {
+  const plan = await createPlan();
+  const { response, body } = await queryOutput(plan.body.planId, {
+    ...protocolRuntime, profiles: [profiles.json],
+  }, { q: "NO-SUCH-CUSTOMER" });
+  assert.equal(response.status, 200);
+  assert.equal(body.representation.profile, profiles.json);
+  assert.deepEqual(body.representation.delivery.value.rows, []);
+  assert.deepEqual(body.representation.delivery.value.columns.map(({ key }) => key), ["id", "name", "city", "amountDue"]);
+  assert.equal(body.audience, "view");
+});
+
+test("negotiated queries retain authentication, session, action and origin checks", async () => {
+  const plan = await createPlan();
+  const unauthenticated = await api("/v1/aug/query", undefined, {
+    method: "POST", body: JSON.stringify({ runtime: protocolRuntime }),
+  });
+  assert.equal(unauthenticated.response.status, 401);
+  assert.equal((await queryOutput(plan.body.planId, protocolRuntime, { token: tokens.otherTenant })).response.status, 404);
+  assert.equal((await queryOutput(plan.body.planId, protocolRuntime, { token: tokens.noScope })).response.status, 404);
+  assert.equal((await queryOutput(plan.body.planId, protocolRuntime, { actionId: "forged-action" })).response.status, 404);
+  assert.equal((await queryOutput(plan.body.planId, protocolRuntime, { headers: { Origin: "https://untrusted.example" } })).response.status, 403);
+});
+
+test("invalid and incompatible runtime declarations have distinct safe HTTP errors", async () => {
+  const plan = await createPlan();
+  const invalid = await queryOutput(plan.body.planId, { extra: "PRIVATE-CANARY" });
+  assert.equal(invalid.response.status, 400);
+  assert.equal(invalid.body.code, "INVALID_RUNTIME");
+  assert.doesNotMatch(JSON.stringify(invalid.body), /PRIVATE-CANARY/);
+  for (const runtime of [
+    { ...protocolRuntime, profiles: ["example.unsupported/1"] },
+    { ...protocolRuntime, protocolVersions: ["aug/999"] },
+    { ...protocolRuntime, deliveryKinds: ["reference"] },
+  ]) {
+    const unsupported = await queryOutput(plan.body.planId, runtime);
+    assert.equal(unsupported.response.status, 406);
+    assert.equal("representation" in unsupported.body, false);
+  }
+});
 
 test("standalone renderer assets are served with a restrictive CSP", async () => {
   const page = await fetch(`${gatewayUrl}/`);

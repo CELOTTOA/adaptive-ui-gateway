@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:aug:schema:control:0.2",
+  "oneOf": [
+    {
+      "type": "object", "additionalProperties": false,
+      "required": ["protocolVersion", "action", "invocationId"],
+      "properties": {
+        "protocolVersion": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "action": { "const": "status" },
+        "invocationId": { "type": "string", "minLength": 1, "maxLength": 128 }
+      }
+    },
+    {
+      "type": "object", "additionalProperties": false,
+      "required": ["protocolVersion", "action", "invocationId", "token"],
+      "properties": {
+        "protocolVersion": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "action": { "const": "confirm" },
+        "invocationId": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "token": { "type": "string", "minLength": 1, "maxLength": 128 }
+      }
+    }
+  ]
+}

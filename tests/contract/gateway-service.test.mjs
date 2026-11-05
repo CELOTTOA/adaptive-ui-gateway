@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { setTimeout as delay } from "node:timers/promises";
 import { GatewayService } from "@aug/gateway-server";
+import { protocolVersion } from "@aug/protocol";
 
 const openApiSource = await readFile(
   new URL("../../examples/customer-api/openapi.json", import.meta.url),
@@ -37,4 +38,15 @@ test("the number of live sessions is bounded", async () => {
     gateway.createPlan(principal, "Search", "demo.customers.list"),
     (error) => error.code === "TOO_MANY_SESSIONS" && error.status === 503,
   );
+});
+
+test("unsupported runtime negotiation stops before the protected backend query", async () => {
+  const events = [];
+  const gateway = service({ onAudit: (event) => events.push(event) });
+  const { planId } = await gateway.createPlan(principal, "Search", "demo.customers.list");
+  await assert.rejects(gateway.queryOutput(principal, planId, "query-data", {}, {
+    protocolVersions: [protocolVersion], profiles: ["example.unknown/1"],
+    mediaTypes: ["application/json"], deliveryKinds: ["inline"],
+  }), (error) => error.code === "NO_COMPATIBLE_REPRESENTATION");
+  assert.deepEqual(events.map((event) => event.type), ["plan.created"]);
 });

@@ -1,8 +1,16 @@
 # Connecting a backend
 
-The current integration contract is a configured backend origin plus an annotated OpenAPI
-3.x document. The MCP launcher uses the synthetic backend by default and accepts an external
-backend configuration. The core and HTTP server can also be composed independently.
+There are two integration paths. For a native AUG backend, declare operations, inputs,
+effects, policies and output offers, then register handlers with `OperationBroker` from
+`@aug/gateway-server`. Start with [operations](operations.md), [output negotiation](protocol.md)
+and [the shared runtime](runtime.md). Native handlers can declare confirmed effects; the
+backend remains responsible for domain rules, authorization and business idempotency.
+
+The rest of this guide covers the existing read-only OpenAPI adapter: a configured backend
+origin plus an annotated OpenAPI 3.x document. The MCP launcher uses the synthetic backend
+by default and accepts this external backend configuration. It does not automatically
+load arbitrary native handlers or discover write operations. The core and HTTP server
+can also be composed independently.
 
 ## Use the same MCP launcher with your backend
 
@@ -48,7 +56,7 @@ of schema defaults/examples and other metadata as well as intent text.
 See [Archteathos](../examples/archteathos/README.md) for a running backend and generated
 profile using this same entrypoint. [Host compatibility limits](compatibility.md) still apply.
 
-## Smallest compatible operation
+## Smallest compatible OpenAPI read operation
 
 Use GET, declare `x-aug-effect: read` and a stable `operationId`, return a JSON array of
 objects with scalar fields, and classify each visible field explicitly. For example:

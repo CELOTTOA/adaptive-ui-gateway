@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "urn:aug:schema:invoke:0.2",
+  "type": "object", "additionalProperties": false,
+  "required": ["protocolVersion", "requestId", "operationId", "operationVersion", "input", "runtime"],
+  "properties": {
+    "protocolVersion": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "requestId": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "operationId": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "operationVersion": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "input": { "type": "object", "additionalProperties": { "$ref": "urn:aug:schema:output:0.2#/$defs/jsonValue" } },
+    "runtime": { "$ref": "urn:aug:schema:runtime:0.2" }
+  }
+}

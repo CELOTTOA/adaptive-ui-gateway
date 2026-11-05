@@ -6,6 +6,7 @@
   },
   "references": [
     { "path": "../../packages/core" },
+    { "path": "../../packages/protocol" },
     { "path": "../../packages/capability-catalog" },
     { "path": "../../packages/discovery-openapi" },
     { "path": "../../packages/security" },

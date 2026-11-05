@@ -5,6 +5,8 @@
   "type": "module",
   "description": "Fixed browser renderer for validated AUG UI Plans, shared by all hosts",
   "exports": {
-    "./plan-renderer.js": "./src/plan-renderer.js"
+    "./plan-renderer.js": "./src/plan-renderer.js",
+    "./operation-runtime.js": "./src/operation-runtime.js",
+    "./runtime.css": "./src/runtime.css"
   }
 }

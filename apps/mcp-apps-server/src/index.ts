@@ -20,10 +20,12 @@ export type { McpBackendConfig } from "./backend-config.js";
 export { ViewOriginRegistry, viewOriginPattern } from "./view-origins.js";
 
 export const searchViewUri = "ui://aug/search-view.html";
+export const runtimeViewUri = "ui://aug/runtime-view.html";
 export const toolNames = {
   listCapabilities: "aug_list_capabilities",
   createView: "aug_create_search_view",
   registerOrigin: "aug_register_view_origin",
+  openRuntime: "aug_open_runtime",
 } as const;
 
 export interface AugMcpServerOptions {
@@ -42,7 +44,7 @@ function failure(error: unknown): CallToolResult {
 }
 
 /** Inlines the ext-apps browser bundle, exposing only the App class as `McpApps.App`. */
-async function buildViewHtml(directGatewayOrigin: string): Promise<string> {
+async function buildViewHtml(directGatewayOrigin: string, runtime = false): Promise<string> {
   const require = createRequire(import.meta.url);
   const bundle = await readFile(
     require.resolve("@modelcontextprotocol/ext-apps/app-with-deps"),
@@ -57,17 +59,19 @@ async function buildViewHtml(directGatewayOrigin: string): Promise<string> {
     throw new Error("Unsupported ext-apps bundle format");
   }
   const appLibrary = `${bundle.slice(0, exported.index)}\nconst McpApps = { App: ${appLocal} };\n`;
-  const [template, view, renderer] = await Promise.all([
-    readFile(new URL("../ui/view.html", import.meta.url), "utf8"),
-    readFile(new URL("../ui/view.js", import.meta.url), "utf8"),
-    readFile(require.resolve("@aug/ui-renderer/plan-renderer.js"), "utf8"),
+  const [template, view, renderer, style] = await Promise.all([
+    readFile(new URL(runtime ? "../ui/runtime.html" : "../ui/view.html", import.meta.url), "utf8"),
+    readFile(new URL(runtime ? "../ui/runtime.js" : "../ui/view.js", import.meta.url), "utf8"),
+    readFile(require.resolve(runtime ? "@aug/ui-renderer/operation-runtime.js" : "@aug/ui-renderer/plan-renderer.js"), "utf8"),
+    runtime ? readFile(require.resolve("@aug/ui-renderer/runtime.css"), "utf8") : Promise.resolve(""),
   ]);
   // The shared renderer is an ES module; inlined into one script, its exports become locals.
   const sharedRenderer = renderer.replace(/^export (?=function )/gm, "");
   const gateway = `const AUG_GATEWAY_ORIGIN = ${JSON.stringify(directGatewayOrigin)};\n` +
     `const AUG_VIEW_ORIGIN_PATTERN = ${viewOriginPattern.toString()};\n`;
   const script = `${appLibrary}\n${gateway}${sharedRenderer}\n${view}`.replaceAll("</script", "<\\/script");
-  return template.replace("/*__AUG_VIEW_SCRIPT__*/", () => script);
+  return template.replace(runtime ? "/*__AUG_RUNTIME_SCRIPT__*/" : "/*__AUG_VIEW_SCRIPT__*/", () => script)
+    .replace("/*__AUG_RUNTIME_STYLE__*/", () => style);
 }
 
 export async function createAugMcpServer(options: AugMcpServerOptions): Promise<McpServer> {
@@ -79,6 +83,7 @@ export async function createAugMcpServer(options: AugMcpServerOptions): Promise<
   const directGatewayOrigin = gatewayUrl.origin;
   const viewCsp = { connectDomains: [directGatewayOrigin], resourceDomains: [] as string[] };
   const html = await buildViewHtml(directGatewayOrigin);
+  const runtimeHtml = await buildViewHtml(directGatewayOrigin, true);
   const server = new McpServer({ name: "adaptive-ui-gateway", version: "0.1.0" });
 
   if (options.viewOrigins) {
@@ -191,6 +196,30 @@ export async function createAugMcpServer(options: AugMcpServerOptions): Promise<
       ],
     }),
   );
+
+  registerAppTool(server, toolNames.openRuntime, {
+    title: "Open AUG operation runtime",
+    description: "Opens the generic AUG operation view. Inputs, confirmation tokens and results use a direct authenticated connection and are not returned to the conversation.",
+    inputSchema: z.object({ operationId: z.string().min(1).max(200).optional() }).strict(),
+    annotations: { readOnlyHint: true, destructiveHint: false, openWorldHint: false },
+    _meta: { ui: { resourceUri: runtimeViewUri } },
+  }, async ({ operationId }) => {
+    try {
+      if (operationId && !service.listOperations(principal).some((operation) => operation.id === operationId)) {
+        throw new AugError("OPERATION_NOT_FOUND", "Operation is not available", 404);
+      }
+      return {
+        content: [{ type: "text", text: "Opening the AUG operation view. Inputs, confirmations and results remain on its direct connection." }],
+        structuredContent: { view: { operationId: operationId ?? null } },
+      };
+    } catch (error) { return failure(error); }
+  });
+
+  registerAppResource(server, "AUG operation runtime", runtimeViewUri, {
+    description: "Fixed runtime for backend-declared AUG operations",
+    _meta: { ui: { csp: viewCsp, prefersBorder: true } },
+  }, async () => ({ contents: [{ uri: runtimeViewUri, mimeType: RESOURCE_MIME_TYPE, text: runtimeHtml,
+    _meta: { ui: { csp: viewCsp, prefersBorder: true } } }] }));
 
   return server;
 }

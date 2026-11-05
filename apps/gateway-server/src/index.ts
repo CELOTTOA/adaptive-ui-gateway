@@ -7,6 +7,7 @@ import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 import { AugError } from "@aug/core";
+import { AugProtocolError, protocolVersion } from "@aug/protocol";
 import type { Principal } from "@aug/core";
 import type { UiPlanner } from "@aug/ui-planner";
 import { GatewayService } from "./gateway-service.js";
@@ -14,6 +15,12 @@ import type { GatewayServiceOptions } from "./gateway-service.js";
 
 export { GatewayService, bindingPolicyId } from "./gateway-service.js";
 export type { AuditEvent, CreatedPlan, GatewayServiceOptions } from "./gateway-service.js";
+export { OperationBroker } from "./operation-broker.js";
+export type { OperationBrokerOptions, OperationContext, OperationEvent, OperationRegistration } from "./operation-broker.js";
+export { MemoryInvocationStore } from "./invocation-store.js";
+export type { InvocationStore, InvocationReceipt, StoredInvocation } from "./invocation-store.js";
+export { SqliteInvocationStore } from "./sqlite-invocation-store.js";
+export { operationStoreFromEnv } from "./state-config.js";
 export { createPlannerFromEnv } from "./planner-config.js";
 export type { PlannerConfig, PlannerConfigOverrides } from "./planner-config.js";
 
@@ -30,6 +37,9 @@ export interface GatewayServerOptions {
   planner?: UiPlanner;
   planTtlMs?: number;
   onAudit?: GatewayServiceOptions["onAudit"];
+  operations?: GatewayServiceOptions["operations"];
+  operationBroker?: GatewayServiceOptions["operationBroker"];
+  operationStore?: GatewayServiceOptions["operationStore"];
 }
 
 function asRecord(value: unknown): Record<string, unknown> {
@@ -146,6 +156,20 @@ async function asset(
 const sharedRendererUrl = pathToFileURL(
   createRequire(import.meta.url).resolve("@aug/ui-renderer/plan-renderer.js"),
 );
+const rendererRequire = createRequire(import.meta.url);
+const operationRuntimeUrl = pathToFileURL(rendererRequire.resolve("@aug/ui-renderer/operation-runtime.js"));
+const runtimeStyleUrl = pathToFileURL(rendererRequire.resolve("@aug/ui-renderer/runtime.css"));
+
+const runtimeDocument = `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AUG operations</title><link rel="stylesheet" href="/runtime.css"><script type="module" src="/runtime-page.js"></script></head>
+<body class="aug-runtime-page"><main>
+<header><h1>AUG operations</h1><a href="/">Search demo</a></header>
+<details id="runtime-connection" open><summary>Connection</summary><form id="runtime-connect" class="aug-connect">
+<label>Direct AUG access token<input id="runtime-token" type="password" autocomplete="off" required></label>
+<button id="runtime-connect-button" type="submit">Connect</button>
+<p id="runtime-connect-status" role="status">Connect to see the operations available to you.</p>
+</form></details><div id="runtime-app"></div></main></body></html>`;
 
 export async function createGatewayServer(options: GatewayServerOptions): Promise<Server | HttpsServer> {
   const service = new GatewayService(options);
@@ -156,7 +180,7 @@ export async function createGatewayServer(options: GatewayServerOptions): Promis
       const url = new URL(request.url ?? "/", "http://gateway.local");
       if (request.method === "OPTIONS") {
         checkOrigin(request, options);
-        if (url.pathname === "/v1/plans" || url.pathname === "/v1/data/query") {
+        if (["/v1/plans", "/v1/data/query", "/v1/aug/query", "/v1/aug/operations", "/v1/aug/invocations", "/v1/aug/invocations/control"].includes(url.pathname)) {
           response.writeHead(204);
           response.end();
           return;
@@ -176,6 +200,22 @@ export async function createGatewayServer(options: GatewayServerOptions): Promis
         });
         response.end(document);
         return;
+      }
+      if (request.method === "GET" && url.pathname === "/runtime") {
+        response.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store",
+          "X-Content-Type-Options": "nosniff",
+          "Content-Security-Policy": "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'" });
+        response.end(runtimeDocument);
+        return;
+      }
+      if (request.method === "GET" && url.pathname === "/operation-runtime.js") {
+        await asset(response, operationRuntimeUrl, "text/javascript; charset=utf-8"); return;
+      }
+      if (request.method === "GET" && url.pathname === "/runtime.css") {
+        await asset(response, runtimeStyleUrl, "text/css; charset=utf-8"); return;
+      }
+      if (request.method === "GET" && url.pathname === "/runtime-page.js") {
+        await asset(response, new URL("../public/runtime-page.js", import.meta.url), "text/javascript; charset=utf-8"); return;
       }
       if (request.method === "GET" && url.pathname === "/renderer.js") {
         await asset(
@@ -200,6 +240,28 @@ export async function createGatewayServer(options: GatewayServerOptions): Promis
         return;
       }
       checkOrigin(request, options);
+      if (request.method === "POST" && url.pathname === "/v1/aug/operations") {
+        json(response, 200, { protocolVersion, operations: service.listOperations(currentPrincipal) });
+        return;
+      }
+      if (request.method === "POST" && url.pathname === "/v1/aug/invocations") {
+        const invocation = service.invokeOperation(currentPrincipal, await body(request));
+        json(response, ["running", "awaiting_confirmation"].includes(invocation.state) ? 202 : 200, invocation);
+        return;
+      }
+      if (request.method === "POST" && url.pathname === "/v1/aug/invocations/control") {
+        const invocation = service.controlInvocation(currentPrincipal, await body(request));
+        json(response, ["running", "awaiting_confirmation"].includes(invocation.state) ? 202 : 200, invocation);
+        return;
+      }
+      if (request.method === "POST" && url.pathname === "/v1/aug/query") {
+        const input = await body(request);
+        const result = await service.queryOutput(
+          currentPrincipal, input.planId, input.actionId, input.state, input.runtime,
+        );
+        json(response, 200, result);
+        return;
+      }
       if (request.method === "POST" && url.pathname === "/v1/plans") {
         const input = await body(request);
         const { planId, expiresAt, plan, source } = await service.createPlan(
@@ -223,14 +285,21 @@ export async function createGatewayServer(options: GatewayServerOptions): Promis
       }
       json(response, 404, { error: "Not found" });
     } catch (error) {
-      if (error instanceof AugError) {
+      if (error instanceof AugProtocolError) {
+        const status = ["NO_COMPATIBLE_REPRESENTATION", "UNSUPPORTED_PROTOCOL_VERSION"].includes(error.code)
+          ? 406 : ["INVALID_RUNTIME", "INVALID_INVOCATION", "INVALID_INPUT"].includes(error.code) ? 400 : 500;
+        json(response, status, { error: error.message, code: error.code });
+      } else if (error instanceof AugError) {
         json(response, error.status, { error: error.message, code: error.code });
       } else {
         json(response, 500, { error: "Internal gateway error", code: "INTERNAL_ERROR" });
       }
     }
   };
-  return options.tls ? createHttpsServer(options.tls, handleRequest) : createServer(handleRequest);
+  const server = options.tls ? createHttpsServer(options.tls, handleRequest) : createServer(handleRequest);
+  server.once("close", () => service.close());
+  server.once("error", () => service.close());
+  return server;
 }
 
 export async function startGatewayServer(

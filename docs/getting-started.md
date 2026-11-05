@@ -9,14 +9,27 @@ npm run smoke:demo
 npm run demo
 ```
 
-Open http://127.0.0.1:4000. Use `demo-analyst-token`, create the search interface, then
-search `CANARY`. Only the tenant-a synthetic match is returned, with `id`, `name`, `city`
-and `amountDue`. `internalNotes` and `tenantId` are not UI columns.
+Open http://127.0.0.1:4000/runtime. Enter `demo-analyst-token`, connect, choose
+**Customer search**, enter `CANARY` in `q` and select **Run operation**. Only the tenant-a
+synthetic match is returned, with `id`, `name`, `city` and `amountDue`. `internalNotes` and
+`tenantId` are not UI columns. The runtime interprets the operation's input schema and
+negotiates a supported output profile; it needs neither a model nor a generated UI plan.
 The backend at port 4100 still enforces its own tenant filter and service credential.
 Stop both servers with Ctrl+C. If a port is occupied, choose `AUG_PORT` and
 `AUG_BACKEND_PORT` in your shell before starting.
 
-## Reproduce the HTTP path
+## Other entry points
+
+The original search-plan demo is at http://127.0.0.1:4000. Enter the same token,
+select **Create search interface**, then search `CANARY`. This path illustrates the earlier
+declarative UI-plan contract and optional model-assisted planning.
+
+For the generic operation HTTP binding and native backend registrations, see
+[operations](operations.md). For embedded use and supported input/result types, see
+[the runtime](runtime.md). Invocation persistence is opt-in; follow
+[persistence](persistence.md) for its configuration and recovery limits.
+
+## Reproduce the original search HTTP path
 
 In another terminal, create a plan:
 
@@ -63,6 +76,9 @@ The entrypoint defaults to the synthetic customer backend and accepts an
 [external backend configuration](backend-integration.md). Its stdout is MCP-only;
 diagnostics go to stderr. The demo token is `demo-analyst-token`; external profiles
 use `AUG_ACCESS_TOKEN`.
+Call `aug_open_runtime` to open the shared operation runtime, then enter the token in
+the protected view. Existing search tools remain available. Inputs, confirmations and
+results use the view's direct authenticated connection rather than MCP tool results.
 Use host-specific configuration only after reading [compatibility](compatibility.md).
 
 Archteathos is optional and requires a separate checkout. Follow
@@ -74,7 +90,7 @@ Archteathos is optional and requires a separate checkout. Follow
 |---|---|
 | `EADDRINUSE` | Stop the other local demo, or choose unused gateway/backend ports |
 | No capability or plan is denied | Verify token, tenant, scopes and OpenAPI read/field annotations |
-| “This demo requires exactly one…” | The standalone loader supports one authorized capability; multiple workflows need a selection UI |
+| “This demo requires exactly one…” | This limit belongs to the original search loader; use `/runtime` for its operation picker |
 | Model timeout/provider error | Inspect value-free planner events; deterministic fallback is expected |
 | TLS test fails on an unusual system clock | Check the public fixture validity; do not disable certificate verification |
 | Embedded view says “Failed to fetch” | Check actual host CSP, origin and CORS; an external curl success is insufficient |

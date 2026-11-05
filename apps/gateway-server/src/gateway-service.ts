@@ -7,6 +7,12 @@ import { ProtectedDataGateway } from "@aug/security";
 import { DeterministicUiPlanner, toPlanningCapability } from "@aug/ui-planner";
 import type { PlanSource, PlanningCapability, UiPlanner } from "@aug/ui-planner";
 import { validateUiPlan } from "@aug/ui-schema";
+import { collectionOutput, negotiateOutput, profiles, protocolVersion, validateRuntimeCapabilities } from "@aug/protocol";
+import type { JsonObject, NegotiatedOutput } from "@aug/protocol";
+import type { AugInvocation, AugOperation } from "@aug/protocol/operations";
+import { OperationBroker } from "./operation-broker.js";
+import type { OperationBrokerOptions, OperationRegistration } from "./operation-broker.js";
+import type { InvocationStore } from "./invocation-store.js";
 
 export const bindingPolicyId = "protected.standalone.read-only.v1";
 
@@ -42,6 +48,10 @@ export interface GatewayServiceOptions {
   planTtlMs?: number;
   maxSessions?: number;
   onAudit?: (event: AuditEvent) => void;
+  /** Backend-native operation registrations; existing OpenAPI reads are also exposed. */
+  operations?: OperationRegistration[];
+  operationBroker?: OperationBrokerOptions;
+  operationStore?: () => InvocationStore;
 }
 
 export interface CreatedPlan {
@@ -83,6 +93,10 @@ export class GatewayService {
   private readonly planTtlMs: number;
   private readonly maxSessions: number;
   private readonly onAudit: ((event: AuditEvent) => void) | undefined;
+  private readonly operationRegistrations: OperationRegistration[];
+  private readonly brokerOptions: OperationBrokerOptions;
+  private broker?: OperationBroker;
+  private readonly storeFactory?: () => InvocationStore;
 
   constructor(options: GatewayServiceOptions) {
     const imported = discoverReadCapabilities(options.openApiSource);
@@ -99,6 +113,63 @@ export class GatewayService {
     this.planTtlMs = options.planTtlMs ?? 15 * 60 * 1000;
     this.maxSessions = options.maxSessions ?? 10_000;
     this.onAudit = options.onAudit;
+    this.brokerOptions = options.operationBroker ?? {};
+    this.operationRegistrations = [
+      ...imported.map(({ capability }) => this.readOperation(capability)),
+      ...(options.operations ?? []),
+    ];
+    this.storeFactory = options.operationStore;
+    if (this.storeFactory && this.brokerOptions.store) throw new AugError("INVALID_STATE_CONFIG", "Configure one operation store source");
+    if (this.storeFactory || this.brokerOptions.store) this.operations();
+  }
+
+  listOperations(principal: Principal): AugOperation[] { return this.operations().list(principal); }
+
+  invokeOperation(principal: Principal, request: unknown): AugInvocation {
+    return this.operations().invoke(principal, request);
+  }
+
+  controlInvocation(principal: Principal, request: unknown): AugInvocation {
+    return this.operations().control(principal, request);
+  }
+
+  private operations(): OperationBroker {
+    if (!this.broker) {
+      // Unsupported legacy metadata must not change startup or the existing search path.
+      const broker = new OperationBroker({ ...this.brokerOptions, ...(this.storeFactory ? { store: this.storeFactory } : {}) });
+      try {
+        for (const registration of this.operationRegistrations) broker.register(registration);
+        this.broker = broker;
+      } catch (error) { broker.close(); throw error; }
+    }
+    return this.broker;
+  }
+
+  private readOperation(capability: Capability): OperationRegistration {
+    return {
+      operation: {
+        protocolVersion, id: capability.id, version: capability.version,
+        title: capability.title, description: capability.description,
+        effect: "read", confirmation: "none", inputSchema: capability.inputSchema as JsonObject,
+        output: [profiles.collection, profiles.json].map((profile, index) => ({
+          id: index === 0 ? "collection" : "json", profile, mediaType: "application/json",
+          audiences: ["view"], deliveryKind: "inline",
+        })),
+      },
+      authorize: (principal) => {
+        const current = this.catalog.getForPrincipal(principal, capability.id);
+        return toPlanningCapability(current, principal).fields.length > 0;
+      },
+      execute: async (input, { principal }) => {
+        const current = this.catalog.getForPrincipal(principal, capability.id);
+        const fields = toPlanningCapability(current, principal).fields;
+        const result = await this.dataGateway.query({
+          principal, capability: current, binding: this.catalog.getBinding(principal, capability.id),
+          fields, args: input,
+        });
+        return collectionOutput(randomUUID(), { columns: fields.map((key) => ({ key })), rows: result.rows }, ["view"]);
+      },
+    };
   }
 
   listCatalog(principal: Principal): PlanningCapability[] {
@@ -106,6 +177,8 @@ export class GatewayService {
       .listForPrincipal(principal)
       .map((capability) => toPlanningCapability(capability, principal));
   }
+
+  close(): void { this.broker?.close(); }
 
   async createPlan(principal: Principal, intent: unknown, capabilityId: unknown): Promise<CreatedPlan> {
     if (
@@ -155,6 +228,33 @@ export class GatewayService {
     actionId: unknown,
     stateValue: unknown,
   ): Promise<QueryResult> {
+    return (await this.executeQuery(principal, planId, actionId, stateValue)).result;
+  }
+
+  /** Opt-in protocol delivery. All records remain on the authenticated view data plane. */
+  async queryOutput(
+    principal: Principal,
+    planId: unknown,
+    actionId: unknown,
+    stateValue: unknown,
+    runtimeInput: unknown,
+  ): Promise<NegotiatedOutput> {
+    const runtime = validateRuntimeCapabilities(runtimeInput);
+    // Check compatibility before touching the backend. Empty output has identical delivery requirements.
+    negotiateOutput(collectionOutput("query", { columns: [], rows: [] }, ["view"]), runtime, "view");
+    const { result, fields } = await this.executeQuery(principal, planId, actionId, stateValue);
+    return negotiateOutput(collectionOutput(randomUUID(), {
+      columns: fields.map((key) => ({ key })),
+      rows: result.rows,
+    }, ["view"]), runtime, "view");
+  }
+
+  private async executeQuery(
+    principal: Principal,
+    planId: unknown,
+    actionId: unknown,
+    stateValue: unknown,
+  ): Promise<{ result: QueryResult; capabilityId: string; fields: string[] }> {
     try {
       const { result, capabilityId, fields } = await this.runQuery(
         principal,
@@ -170,7 +270,7 @@ export class GatewayService {
         fields,
         rowCount: result.rows.length,
       });
-      return result;
+      return { result, capabilityId, fields };
     } catch (error) {
       this.audit({
         type: "query.denied",

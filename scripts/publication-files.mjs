@@ -15,7 +15,7 @@ export async function publicationFiles(root) {
       if (["node_modules", "dist", ".local", ".git"].includes(item.name)) continue;
       const path = `${directory}/${item.name}`;
       if (item.isDirectory()) await walk(path);
-      else if (item.isFile() && !/\.(?:log|tsbuildinfo)$/.test(item.name)) files.push(path);
+      else if (item.isFile() && !/\.(?:log|tsbuildinfo)$/.test(item.name) && !/\.aug-state\.sqlite(?:-.*)?$/.test(item.name)) files.push(path);
     }
   }
   for (const rootDirectory of roots) await walk(rootDirectory);

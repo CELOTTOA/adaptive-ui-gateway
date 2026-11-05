@@ -1,6 +1,6 @@
 # Security policy
 
-AUG v0.1 is experimental. The supported review target is the current `main` branch;
+AUG is experimental, currently using application protocol `aug/0.2`. The supported review target is the current `main` branch;
 there is no production support or response-time commitment.
 
 ## Reporting a vulnerability
@@ -16,10 +16,12 @@ data, expected boundary and observed result. A fix or regression test is welcome
 
 ## Scope and assumptions
 
-The implementation separates UI planning from authorized retrieval. That separation is
+The implementation separates MCP/model metadata from direct authenticated view requests
+for invocation inputs, confirmations and results. The optional search planner also receives
+intent and authorized metadata. That separation is
 not a promise of protection from a compromised desktop client, browser, OS, screen capture,
 browser extensions, deliberate user disclosure or host-side observation of a rendered view.
-An external model still receives user intent and authorized capability metadata.
+Sensitive values can still be supplied in user intent or capability metadata.
 
 The default demo binds to loopback and uses public fixture credentials. Do not deploy its
 authentication as a remote service or substitute real records without designing actual

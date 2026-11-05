@@ -4,6 +4,10 @@ This is an early reference implementation. Small, reproducible findings are espe
 valuable: a failing test, an adapter, a host compatibility observation or a usability result.
 You do not need a model API key to contribute.
 
+The current focus is the `aug/0.2` application contract and shared runtimes. Independent
+implementations, profile conformance cases and backend-native integrations are useful
+contributions alongside the existing OpenAPI search adapter.
+
 ## Local setup
 
 Use Node.js 22.14+ on the 22.x line or Node.js 24.x and npm:
@@ -45,7 +49,7 @@ Follow the surrounding TypeScript/ES module style; avoid unrelated formatting ch
 - Keep the API-key-free demo and tests operational. Document any optional external service.
 - Declare estimates and adapter limitations. Do not present a fixture or simulated provider as a live result.
 
-Please discuss write operations, remote authentication, certificate distribution, new component
+Please discuss new effect integrations, remote authentication, certificate distribution, new component
 execution capabilities or changes to the data/model boundary before implementing a broad solution.
 
 ## Review and community

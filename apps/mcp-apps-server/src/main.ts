@@ -5,7 +5,7 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startCustomerApi } from "@aug/example-customer-api";
-import { GatewayService, createPlannerFromEnv, startGatewayServer } from "@aug/gateway-server";
+import { GatewayService, createPlannerFromEnv, operationStoreFromEnv, startGatewayServer } from "@aug/gateway-server";
 import type { AuditEvent } from "@aug/gateway-server";
 import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
 import { createAugMcpServer, backendConfigFromEnv, ViewOriginRegistry } from "./index.js";
@@ -45,6 +45,7 @@ const { planner, description } = createPlannerFromEnv(process.env, {
   onEvent: (event) => console.error("aug planner", JSON.stringify(event)),
 });
 // Only the demo backend is owned by this process. External services are never stopped here.
+const operationStore = operationStoreFromEnv(process.env);
 const backend = config.mode === "demo" ? await startCustomerApi({ port: 0, backendToken }) : undefined;
 const address = backend?.address();
 const backendBaseUrl = config.backendBaseUrl ??
@@ -87,6 +88,7 @@ async function run(): Promise<void> {
     // Give each instance its own listener and advertise that origin to its view.
     port: 0,
     ...serviceOptions,
+    ...(operationStore ? { operationStore } : {}),
     authenticate: (token) => (token === accessToken ? principal : undefined),
     allowedOrigins: viewOrigins.allowedOrigins,
     ...(gatewayTls ? { tls: gatewayTls } : {}),

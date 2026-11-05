@@ -1,36 +1,49 @@
 # Roadmap and open decisions
 
-The project is a reference implementation under review, not a commitment to implement
-every feature in the original RFC. Prefer evidence and small changes over expanding scope.
+AUG is an experimental protocol and reference implementation. The goal is for backends to
+declare capabilities through a common contract and for compatible runtimes to provide
+interfaces, including inside AI chats. Progress should establish interoperability and
+useful interactions rather than require every feature in the original RFC.
 
-## v0.1: make the current slice reproducible
+## Implemented baseline
 
-- API-key-free synthetic demo and test suite from a clean checkout.
-- Explicit current architecture, threat model, host evidence and backend adapter contract.
-- Windows/Linux CI on Node 22 and 24, plus opt-in provider tests.
-- A reviewed publication snapshot, MIT license and contribution entry points.
+- An API-key-free synthetic demo and contract/integration tests; Windows/Linux CI on Node
+  22 and 24. Historical publication evidence is recorded in [publication](publication.md).
+- Application wire version `aug/0.2`: backend-native operations, JSON Schema inputs,
+  audience-aware output negotiation and an invocation lifecycle with explicit confirmations.
+- One shared runtime in a browser and an MCP App: operation selection, typed/JSON input,
+  inline collections/JSON/text, saved-input review and lost-reply/status recovery.
+- Optional encrypted SQLite invocation state, durable request receipts and conservative
+  crash recovery. Unknown execution outcomes require backend reconciliation.
+- An annotated read-only OpenAPI adapter, the original search-plan flow and optional
+  model-assisted layout planning. The local MCP launcher supports external read backends
+  through configuration; Archteathos is a separate-checkout example.
+
+These are reference capabilities, not evidence of production deployment, exactly-once
+effects or successful operation in every chat host.
 
 ## Next investigations
 
-The local MCP entrypoint now connects external backends through configuration, with explicit
-identity/credentials and input schemas in its metadata catalog. The same process is tested
-against both the default demo and the separate Archteathos read adapter.
-
 | Question | Useful result |
 |---|---|
-| Does model planning improve a task? | A small, reproducible comparison with deterministic and hand-built layouts, with latency/cost and failures |
-| What does integration actually cost? | A second independent adapter with a log of annotations, transformations and unsupported semantics |
+| Can others implement AUG independently? | A small backend and a second runtime using the written contract, with reusable conformance fixtures and a record of ambiguities |
+| How should profiles evolve? | Explicit compatibility/version rules and tests for independently extended runtimes; keep JSON/text fallbacks intentional |
+| Which additional outputs matter? | A bounded reference/document profile implementation, including authorization, expiry and safe fetching; streaming needs its own contract |
+| Can an effect be reconciled after uncertainty? | A synthetic backend with durable business idempotency and an explicit reconciliation flow, tested across crashes without blind replay |
+| How portable is the embedded runtime? | Real host/version evidence for rendering, direct requests, confirmation and recovery, with a separate model-context check |
+| How should local HTTPS be provisioned? | Reviewed storage, permissions, trust, rotation and removal without weakening certificate verification |
+| What does integration actually cost? | An independent backend integration with recorded declarations, transformations and unsupported semantics |
 | Can response handling stay bounded? | Streaming size enforcement with oversized/misleading Content-Length tests |
-| Can metadata fail safely? | Bounded local reference resolution and tests for cyclic/invalid OpenAPI documents |
-| How portable is the embedded channel? | Real host/version evidence, including rendered values and a separate model-context check |
-| How should local HTTPS be provisioned? | A reviewed lifecycle covering storage, permissions, trust, rotation and removal without weakening verification |
-| How do we move beyond one search capability? | A capability selection interaction with preserved policy checks and no model-selected endpoints |
+| Can imported metadata fail safely? | Bounded local reference resolution and cyclic/invalid OpenAPI tests |
+| Does optional model planning improve a task? | Reproducible comparison with deterministic/hand-built layouts, including cost, latency and failures |
 
-## Deliberately deferred
+## Requires separate design
 
-Write operations, remote OAuth/multi-user hosting, durable state, A2UI serialization,
-automatic MCP capability discovery and a broad component library require separate design
-review. They should not be prerequisites for examining the present read-only implementation.
+Production identity/OAuth, remote multi-user deployment, durable audit export, distributed
+state ownership and cross-application workflow graphs require further design. So do broad
+custom visual extensions, OpenAPI write discovery, alternative UI serialization and
+automatic MCP capability discovery. Native confirmed effects and optional invocation
+persistence are already implemented; they do not solve those broader deployment questions.
 
-Suggested initial work is recorded in [community briefs](community/README.md). These are
-local issue drafts, not claims that public GitHub issues already exist.
+The [initial community briefs](community/README.md) retain useful bounded investigations
+from the first search prototype. They are repository drafts, not public GitHub issues.

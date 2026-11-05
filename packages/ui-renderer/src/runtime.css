@@ -1,0 +1,59 @@
+/* One centered work area, no sidebar. At 1440: (1440 - 1088) / 2 = 176px gutters.
+   Embedded widths and phones use a single fluid column with a 16px inset. */
+.aug-runtime-page { color-scheme: light; font: 14px/1.5 system-ui, sans-serif; color: #17211b; background: #f4f6f3; margin: 0; }
+.aug-runtime-page main { width: min(1088px, calc(100% - 32px)); margin: 24px auto; }
+.aug-runtime-page header { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.aug-runtime-page h1 { font-size: 24px; font-weight: 600; margin: 0; }
+.aug-runtime-page header a { color: inherit; }
+.aug-runtime, .aug-connect { font: 14px/1.5 system-ui, sans-serif; color: var(--color-text-primary, #17211b); }
+.aug-runtime { padding: 24px; border: 1px solid #d8dfd9; border-radius: 8px; background: var(--color-background-primary, #fefefd); }
+.aug-runtime h2 { font-size: 20px; font-weight: 600; margin: 24px 0 6px; }
+.aug-runtime h3 { font-size: 16px; font-weight: 600; margin: 0 0 12px; }
+.aug-runtime p { max-width: 75ch; }
+.aug-description, .aug-field-help { color: var(--color-text-secondary, #535e57); }
+.aug-description { margin: 0 0 20px; }
+.aug-runtime label, .aug-connect label { display: grid; gap: 6px; font-weight: 500; }
+.aug-runtime input, .aug-runtime select, .aug-runtime textarea, .aug-connect input {
+  box-sizing: border-box; max-width: 100%; width: 100%; min-height: 40px; padding: 8px 10px;
+  border: 1px solid #8c9990; border-radius: 6px; font: inherit;
+  background: var(--color-background-primary, #fefefd); color: inherit;
+}
+.aug-runtime > label { max-width: 440px; }
+.aug-runtime textarea { resize: vertical; }
+.aug-fields { padding: 0; margin: 24px 0 16px; border: 0; min-width: 0; }
+.aug-fields legend { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+.aug-fields .aug-input-mode { min-height: 32px; padding: 0; margin-bottom: 12px; border: 0; font-size: 12px; text-decoration: underline; color: var(--color-text-secondary, #535e57); }
+.aug-inputs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; max-width: 760px; }
+.aug-inputs > :only-child { grid-column: 1 / -1; }
+.aug-field { align-content: start; }
+.aug-field-help { font-size: 12px; font-weight: 400; }
+.aug-runtime button, .aug-connect button { min-height: 40px; padding: 8px 14px; border: 1px solid transparent; border-radius: 6px; font: inherit; font-weight: 500; cursor: pointer; margin: 0 8px 0 0; }
+.aug-primary, .aug-connect button { background: #17211b; color: #fefefd; }
+.aug-runtime .aug-secondary { background: transparent; border-color: #8c9990; color: inherit; }
+.aug-runtime button:hover:not(:disabled), .aug-connect button:hover:not(:disabled) { filter: brightness(0.92); }
+.aug-runtime button:disabled, .aug-runtime :disabled, .aug-connect button:disabled { cursor: default; opacity: 0.8; }
+.aug-runtime :focus-visible, .aug-connect :focus-visible { outline: 2px solid #145d3a; outline-offset: 3px; }
+.aug-status { margin: 16px 0 0; min-height: 21px; }
+.aug-error { color: #9a3029; }
+.aug-review, .aug-result { margin-top: 24px; padding-top: 20px; border-top: 1px solid #d8dfd9; }
+.aug-runtime pre { font: 13px/1.6 ui-monospace, monospace; white-space: pre-wrap; overflow-wrap: anywhere; margin: 12px 0 16px; }
+.aug-table-wrap { max-width: 100%; overflow-x: auto; }
+.aug-runtime table { border-collapse: collapse; width: 100%; min-width: max-content; }
+.aug-runtime caption { text-align: left; padding-bottom: 12px; font-size: 12px; color: var(--color-text-secondary, #535e57); }
+.aug-runtime th, .aug-runtime td { text-align: left; padding: 12px 10px; border-bottom: 1px solid #e5e9e5; vertical-align: top; white-space: nowrap; }
+.aug-runtime th { font-size: 12px; font-weight: 500; color: var(--color-text-secondary, #535e57); }
+.aug-runtime .aug-number { text-align: right; font-variant-numeric: tabular-nums; }
+.aug-connect { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; margin-bottom: 24px; }
+.aug-connect label { width: min(100%, 360px); }
+.aug-connect p { flex-basis: 100%; margin: 0; }
+#runtime-connection { margin-bottom: 20px; }
+#runtime-connection summary { cursor: pointer; font-size: 14px; }
+#runtime-connection[open] summary { margin-bottom: 12px; }
+.aug-runtime [hidden], .aug-connect[hidden] { display: none !important; }
+@media (max-width: 640px) {
+  .aug-runtime { padding: 16px; }
+  .aug-inputs { grid-template-columns: minmax(0, 1fr); }
+  .aug-runtime-page header { align-items: start; }
+  .aug-runtime-page header a { font-size: 12px; }
+  .aug-runtime th:first-child, .aug-runtime td:first-child { position: sticky; left: 0; background: var(--color-background-primary, #fefefd); }
+}

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { startCustomerApi } from "@aug/example-customer-api";
 import { startGatewayServer } from "@aug/gateway-server";
+import { profiles, protocolVersion } from "@aug/protocol";
 import { httpsJson } from "../helpers/https-client.mjs";
 
 const backendToken = "demo-backend-service-token";
@@ -74,4 +75,34 @@ test("same-origin HTTPS is accepted without trusting an unconfigured cross-origi
     body: { intent: "Search", capabilityId: "demo.customers.list" },
   });
   assert.equal(created.status, 201);
+});
+
+test("negotiated output supports exact-origin HTTPS preflight and authenticated delivery", async () => {
+  const preflight = await httpsJson(`${gatewayUrl}/v1/aug/query`, {
+    ca: cert, method: "OPTIONS", headers: { Origin: origin, "Access-Control-Request-Method": "POST" },
+  });
+  assert.equal(preflight.status, 204);
+  assert.equal(preflight.headers["access-control-allow-origin"], origin);
+  const refused = await httpsJson(`${gatewayUrl}/v1/aug/query`, {
+    ca: cert, method: "OPTIONS", headers: { Origin: "https://untrusted.example" },
+  });
+  assert.equal(refused.status, 403);
+  assert.equal(refused.headers["access-control-allow-origin"], undefined);
+  const headers = { Origin: origin, Authorization: `Bearer ${token}` };
+  const created = await httpsJson(`${gatewayUrl}/v1/plans`, {
+    ca: cert, method: "POST", headers,
+    body: { intent: "Search customers", capabilityId: "demo.customers.list" },
+  });
+  const queried = await httpsJson(`${gatewayUrl}/v1/aug/query`, {
+    ca: cert, method: "POST", headers,
+    body: {
+      planId: created.body.planId, actionId: "query-data", state: { filters: { q: "CANARY" } },
+      runtime: { protocolVersions: [protocolVersion], profiles: [profiles.collection],
+        mediaTypes: ["application/json"], deliveryKinds: ["inline"] },
+    },
+  });
+  assert.equal(queried.status, 200);
+  assert.equal(queried.headers["access-control-allow-origin"], origin);
+  assert.equal(queried.body.audience, "view");
+  assert.equal(queried.body.representation.delivery.value.rows[0].name, "Aurora CANARY-A-7F3A");
 });

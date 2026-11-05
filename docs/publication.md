@@ -1,8 +1,8 @@
-# v0.1 publication record
+# Publication record
 
 This file records preparation evidence, not a certification of production readiness.
 
-## Public scope
+## Initial v0.1 public scope
 
 The release presents AUG as an experimental reference implementation of metadata-driven,
 read-only UI planning with a separate authorized data channel. The API-key-free synthetic
@@ -55,6 +55,27 @@ vulnerability reporting, secret scanning and secret push protection were enabled
 The final publication-history check exposed a Windows CRLF/Git LF mismatch for the deliberately
 public TLS fixture; fixture comparison now normalizes line endings while retaining the exact
 path/content exception. CI fetches full history and runs the historical check as well.
+
+## Protocol and runtime update on 5 November 2026
+
+The next reviewed source snapshot adds application protocol `aug/0.2`, backend-native
+operation registration, negotiated outputs, explicit confirmations, the shared standalone/
+embedded operation runtime and optional encrypted SQLite invocation state. README,
+architecture, integration guides and roadmap now describe that baseline. Profile versions,
+the legacy `aug.ui/0.1` plan contract and private workspace package versions remain separate.
+This is a source update, not an npm release or a production certification.
+
+The local implementation commits are `ad0a246` (protocol/broker), `8c5ad15` (runtime) and
+`1ff43e1` (persistent state). Their original history remains local. Publication continues
+the existing public history from `e54ed2091b1b5b11fcb0827724f832d0dee63a31`, whose source tree
+matches local predecessor `720bc67` exactly. The export excludes credentials, invocation
+databases, generated files and loose artwork. Public branch/tree verification is required
+after the update; the historical CI result above does not validate this new snapshot.
+
+Local implementation verification: `npm test` passed 152 tests, skipped 4 opt-in tests and
+failed 0 (156 total). The demo-launcher smoke and targeted publication check passed.
+Persistence is opt-in; no operational state database or encryption key is bundled.
+These checks do not establish new live-host HTTPS compatibility.
 
 ## Intentional open items
 

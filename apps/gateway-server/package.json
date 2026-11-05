@@ -15,6 +15,7 @@
     "@aug/discovery-openapi": "0.1.0",
     "@aug/example-customer-api": "0.1.0",
     "@aug/model-provider-xai": "0.1.0",
+    "@aug/protocol": "0.1.0",
     "@aug/security": "0.1.0",
     "@aug/ui-planner": "0.1.0",
     "@aug/ui-renderer": "0.1.0",

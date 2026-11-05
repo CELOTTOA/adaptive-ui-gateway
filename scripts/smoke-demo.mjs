@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 
 // Exercise the actual compiled launcher on free ports, without any provider key.
 const child = spawn(process.execPath, ["apps/gateway-server/dist/demo.js"], {
-  env: { ...process.env, GROK_API_KEY: "", AUG_PORT: "0", AUG_BACKEND_PORT: "0" },
+  env: { ...process.env, GROK_API_KEY: "", AUG_PORT: "0", AUG_BACKEND_PORT: "0", AUG_STATE_DB: "", AUG_STATE_KEY: "" },
   stdio: ["ignore", "pipe", "pipe"], windowsHide: true,
 });
 let output = "";

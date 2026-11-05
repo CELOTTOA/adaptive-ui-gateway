@@ -4,7 +4,7 @@ import { readFile } from "node:fs/promises";
 import { Client, InMemoryTransport } from "@modelcontextprotocol/client";
 import { startCustomerApi } from "@aug/example-customer-api";
 import { GatewayService, startGatewayServer } from "@aug/gateway-server";
-import { createAugMcpServer, searchViewUri, toolNames, ViewOriginRegistry } from "@aug/mcp-apps-server";
+import { createAugMcpServer, searchViewUri, runtimeViewUri, toolNames, ViewOriginRegistry } from "@aug/mcp-apps-server";
 
 const backendToken = "demo-backend-service-token";
 const accessToken = "demo-analyst-token";
@@ -90,6 +90,31 @@ test("the host can open views but has no data query tool", async () => {
   assert.ok(!tools.some((tool) => tool.name === "aug_query_records"));
   const registration = tools.find((tool) => tool.name === toolNames.registerOrigin);
   assert.deepEqual(registration._meta.ui.visibility, ["app"]);
+});
+
+test("the generic runtime opens through metadata only and shares its fixed renderer with the browser", async () => {
+  const tools = (await client.listTools()).tools;
+  assert.equal(tools.find(({ name }) => name === toolNames.openRuntime)._meta.ui.resourceUri, runtimeViewUri);
+  assert.ok(!tools.some(({ name }) => /invoke|confirm/.test(name)));
+  const opened = await client.callTool({ name: toolNames.openRuntime, arguments: { operationId: "demo.customers.list" } });
+  assert.notEqual(opened.isError, true);
+  assert.deepEqual(opened.structuredContent.view, { operationId: "demo.customers.list" });
+  assert.doesNotMatch(modelVisible(opened), /CANARY|token|planId|inputSchema|confirmationToken/i);
+  const denied = await client.callTool({ name: toolNames.openRuntime, arguments: { operationId: "unavailable" } });
+  assert.equal(denied.isError, true);
+  const resource = await client.readResource({ uri: runtimeViewUri });
+  const html = resource.contents[0].text;
+  assert.match(html, /function createOperationRuntime/);
+  assert.match(html, /runtime-connect/);
+  assert.match(html, /\/v1\/aug\/invocations/);
+  assert.equal(/demo-analyst-token|demo-backend-service-token|runtimeApp\.(?:updateModelContext|sendMessage)\(/.test(html), false);
+  assert.deepEqual(resource.contents[0]._meta.ui.csp.connectDomains, [gatewayUrl]);
+  const page = await fetch(`${gatewayUrl}/runtime`);
+  assert.equal(page.status, 200);
+  assert.match(page.headers.get("content-security-policy"), /script-src 'self'/);
+  assert.match(await page.text(), /operation|Operations|operations/);
+  const script = await fetch(`${gatewayUrl}/operation-runtime.js`);
+  assert.match(await script.text(), /export function createOperationRuntime/);
 });
 
 test("a new conversation registers only its exact origin, while data still requires credentials", async () => {
