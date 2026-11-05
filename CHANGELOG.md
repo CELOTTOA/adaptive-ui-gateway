@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Add a standalone Python inventory backend and independent Node terminal runtime with no
+  AUG dependencies, reusable wire vectors and cross-implementation interoperability checks.
+- Clarify discovery envelopes, epoch-millisecond deadlines, initial terminal responses,
+  observed revision jumps and equivalent numeric inputs in the operation binding.
 - Advance the application wire protocol to `aug/0.2` for explicit indeterminate outcomes.
 - Add optional encrypted SQLite invocation state and durable request receipts behind a store
   interface; never automatically replay interrupted effects, and verify crash/HTTP recovery.

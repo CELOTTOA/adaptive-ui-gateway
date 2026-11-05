@@ -23,6 +23,12 @@ and the existing-checkout Archteathos test are skipped when their explicit confi
 absent. `npm run test:live` can contact the configured provider and incur usage charges;
 run it only when you intend to use your own key. Do not commit `.envlocal` or local TLS keys.
 
+`npm run test:interop` additionally requires Python 3.11+ (`python`, or the executable in
+`AUG_PYTHON`). It tests the standalone Python backend and independent terminal runtime
+against the original components; a missing interpreter fails this check. It needs no pip
+packages or API key. CI runs it on all four OS/Node combinations. See
+[the interoperability record](docs/interoperability.md).
+
 The [getting-started guide](docs/getting-started.md) explains the demo. Read
 [the architecture](docs/architecture.md) and [security model](docs/security-model.md)
 before changing policy, data access or host transport.

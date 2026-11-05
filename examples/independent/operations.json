@@ -1,0 +1,39 @@
+[
+  {
+    "protocolVersion": "aug/0.2",
+    "id": "inventory.stock.list",
+    "version": "1",
+    "title": "Stock availability",
+    "description": "Search synthetic stock in the authenticated tenant",
+    "effect": "read",
+    "confirmation": "none",
+    "inputSchema": {
+      "type": "object", "additionalProperties": false,
+      "properties": { "q": { "type": "string", "maxLength": 80 } }
+    },
+    "output": [
+      { "id": "collection", "profile": "aug.collection/0.1", "mediaType": "application/json", "audiences": ["view"], "deliveryKind": "inline" },
+      { "id": "json", "profile": "aug.json/0.1", "mediaType": "application/json", "audiences": ["view"], "deliveryKind": "inline" },
+      { "id": "text", "profile": "aug.text/0.1", "mediaType": "text/plain", "audiences": ["view"], "deliveryKind": "inline" }
+    ]
+  },
+  {
+    "protocolVersion": "aug/0.2",
+    "id": "inventory.stock.reserve",
+    "version": "1",
+    "title": "Reserve synthetic stock",
+    "description": "Subtract units from an in-memory demo stock after explicit confirmation",
+    "effect": "write",
+    "confirmation": "explicit",
+    "inputSchema": {
+      "type": "object", "additionalProperties": false, "required": ["sku", "quantity"],
+      "properties": {
+        "sku": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "quantity": { "type": "integer", "minimum": 1, "maximum": 50 }
+      }
+    },
+    "output": [
+      { "id": "json", "profile": "aug.json/0.1", "mediaType": "application/json", "audiences": ["view"], "deliveryKind": "inline" }
+    ]
+  }
+]

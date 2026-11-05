@@ -1,0 +1,25 @@
+{
+  "protocolVersion": "aug/0.2",
+  "negotiation": [
+    { "name": "producer preference wins", "profiles": ["aug.json/0.1", "aug.collection/0.1", "aug.text/0.1"], "profile": "aug.collection/0.1" },
+    { "name": "explicit JSON alternative", "profiles": ["aug.json/0.1"], "profile": "aug.json/0.1" },
+    { "name": "explicit text alternative", "profiles": ["aug.text/0.1"], "profile": "aug.text/0.1" }
+  ],
+  "requests": [
+    { "name": "unknown input field", "patch": { "input": { "private": "value" } }, "status": 400, "code": "INVALID_INPUT" },
+    { "name": "wrong input type", "patch": { "input": { "q": 1 } }, "status": 400, "code": "INVALID_INPUT" },
+    { "name": "operation version is exact", "patch": { "operationVersion": "2" }, "status": 409, "code": "OPERATION_VERSION_MISMATCH" },
+    { "name": "wire version is exact", "patch": { "protocolVersion": "aug/0.1" }, "status": 406, "code": "UNSUPPORTED_PROTOCOL_VERSION" },
+    { "name": "unknown operation", "patch": { "operationId": "inventory.unknown" }, "status": 404, "code": "OPERATION_NOT_FOUND" },
+    { "name": "unknown envelope field", "patch": { "endpoint": "https://untrusted.example" }, "status": 400, "code": "INVALID_INVOCATION" },
+    { "name": "boolean is not integer", "patch": { "operationId": "inventory.stock.reserve", "input": { "sku": "BOLT-A", "quantity": true } }, "status": 400, "code": "INVALID_INPUT" },
+    { "name": "integer lower bound", "patch": { "operationId": "inventory.stock.reserve", "input": { "sku": "BOLT-A", "quantity": 0 } }, "status": 400, "code": "INVALID_INPUT" },
+    { "name": "fraction is not integer", "patch": { "operationId": "inventory.stock.reserve", "input": { "sku": "BOLT-A", "quantity": 1.5 } }, "status": 400, "code": "INVALID_INPUT" },
+    { "name": "required input", "patch": { "operationId": "inventory.stock.reserve", "input": { "sku": "BOLT-A" } }, "status": 400, "code": "INVALID_INPUT" },
+    { "name": "integer upper bound", "patch": { "operationId": "inventory.stock.reserve", "input": { "sku": "BOLT-A", "quantity": 51 } }, "status": 400, "code": "INVALID_INPUT" },
+    { "name": "empty required string", "patch": { "operationId": "inventory.stock.reserve", "input": { "sku": "", "quantity": 1 } }, "status": 400, "code": "INVALID_INPUT" },
+    { "name": "input root is an object", "patch": { "input": [] }, "status": 400, "code": "INVALID_INVOCATION" },
+    { "name": "empty wire version is malformed", "patch": { "protocolVersion": "" }, "status": 400, "code": "INVALID_INVOCATION" },
+    { "name": "runtime profile identifiers are unique", "patch": { "runtime": { "protocolVersions": ["aug/0.2"], "profiles": ["aug.json/0.1", "aug.json/0.1"], "mediaTypes": ["application/json"], "deliveryKinds": ["inline"] } }, "status": 400, "code": "INVALID_INVOCATION" }
+  ]
+}

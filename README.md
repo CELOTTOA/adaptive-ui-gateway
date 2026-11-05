@@ -115,6 +115,7 @@ For the actual renderer and request path, see [the walkthrough](docs/demo-walkth
 | MCP Apps | One configurable local stdio entrypoint for demo or external backends; metadata-only catalog includes input schemas |
 | Tests | Contract, integration, stdio, TLS and opt-in live tests; no API key required for the main suite |
 | Second backend | Archteathos theatre sheets through a specific read-only adapter, without changing AUG core packages |
+| Protocol interoperability | Standalone Python backend and an independent Node terminal runtime; cross-checks with the original broker and browser runtime |
 
 The application wire version is **`aug/0.2`**. Representation profiles such as
 `aug.collection/0.1` have independent versions; the original search-plan format remains
@@ -165,6 +166,12 @@ published npm packages.
 checkout. Its adapter translates nested theatre sheets into the supported read-only shape.
 That example demonstrates adapter integration, not automatic discovery of arbitrary applications.
 No Archteathos data or source code is bundled in this repository.
+
+For a framework-free implementation in another language, see
+[the Python backend and terminal runtime](examples/independent/README.md). Their standalone
+pair needs no AUG packages or build. [The interoperability exercise](docs/interoperability.md)
+records cross-implementation checks and specification clarifications. With Python 3.11+
+installed, run `npm run test:interop` to reproduce them; the standard `npm test` stays Node-only.
 
 ## Help shape the project
 

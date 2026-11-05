@@ -75,7 +75,12 @@ stateDiagram-v2
 ```
 
 Each invocation identifies its operation/version and has a monotonically increasing
-`revision`. Payloads depend on state:
+`revision`. Revisions advance on state transitions; a consumer may miss intermediate
+states between requests. Repeated snapshots at the same revision must agree. Terminal
+invocations never reopen. A synchronous producer can return a terminal result on the
+initial request; consumers must not assume that every operation needs polling.
+
+Payloads depend on state:
 
 | State | Additional payload |
 |---|---|
@@ -102,6 +107,10 @@ ID and token; it cannot replace inputs or endpoints. Authorization is checked at
 invocation, status, confirmation and immediately before handler dispatch. Registrations
 are immutable for the broker lifetime.
 
+`confirmation.expiresAt` is an absolute Unix epoch timestamp in milliseconds. Tokens and
+invocation IDs are opaque strings within the schema bounds; a runtime must not assume
+that either uses UUID syntax. Confirmation tokens belong only in the protected view.
+
 State changes synchronously before execution. Repeated/concurrent confirmations return
 existing state instead of starting another handler. Input and execution context are
 detached and frozen. Expired confirmation cannot start an operation. A cooperating trusted
@@ -111,6 +120,10 @@ against a compromised chat host.
 Every invocation has a `requestId`. Deduplication is scoped to user/tenant and fingerprints
 operation/version, input and runtime declaration, independently of object-key order.
 Reusing the ID for a different request returns a conflict. Returned snapshots are detached.
+
+Equivalent JSON numbers, such as integer `1` and `1.0`, represent the same input value;
+booleans remain a different type. This defines value equality for the accepted input,
+not a standardized cryptographic fingerprint encoding across implementations.
 
 The default store is in memory: limits are 1,000 retained/active invocations, a five-minute confirmation
 deadline and fifteen-minute retention after terminal state. Running work is not evicted;
@@ -149,9 +162,12 @@ token is exposed through MCP.
 
 | Route | Request / response |
 |---|---|
-| `POST /v1/aug/operations` | No body required; returns authorized descriptors |
+| `POST /v1/aug/operations` | No body required; returns `{ "protocolVersion": "aug/0.2", "operations": [...] }` |
 | `POST /v1/aug/invocations` | Invocation request; returns initial or retained state |
 | `POST /v1/aug/invocations/control` | `status` or `confirm`; returns owned state |
+
+Discovery returns HTTP 200, including an empty `operations` array for an authenticated
+principal with no permitted operations. Descriptors contain metadata, not result records.
 
 An invocation needs no UI plan:
 
@@ -176,6 +192,10 @@ Confirmation adds `token` from the pending state. Extra fields, including replac
 are rejected. Running/awaiting states return HTTP 202; terminal states return 200. Handler
 and output failures of reads produce terminal `OPERATION_FAILED` without raw messages.
 An uncertain effect produces `EXECUTION_OUTCOME_UNKNOWN` in the indeterminate state.
+
+A valid repeated confirmation returns the retained state without another dispatch.
+An invalid token is still refused after completion. A successful HTTP response contains
+one invocation snapshot, not an invocation wrapper or the producer's full output envelope.
 
 Malformed input/messages return 400, denied tokens 403, unavailable operations/invocations
 404, version/idempotency/expiry conflicts 409, incompatible runtimes 406 and capacity
@@ -202,3 +222,7 @@ Run `npm test`. Tests cover schemas, replay, ownership, immutable confirmations,
 safe failures and real HTTP execution against synthetic/native backends. They do not claim
 real production writes. The [operation runtime](runtime.md) now consumes these contracts
 through a shared browser interpreter for the supported inputs and inline profiles.
+
+The [interoperability exercise](interoperability.md) also checks an independent Python
+producer and terminal consumer against these contracts. Run `npm run test:interop` with
+Python 3.11+ to reproduce the cross-implementation matrix and language-neutral wire vectors.

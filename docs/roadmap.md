@@ -18,6 +18,10 @@ useful interactions rather than require every feature in the original RFC.
 - An annotated read-only OpenAPI adapter, the original search-plan flow and optional
   model-assisted layout planning. The local MCP launcher supports external read backends
   through configuration; Archteathos is a separate-checkout example.
+- A standalone Python inventory producer and independent Node terminal consumer, with
+  shared wire vectors and cross-checks against the original broker/browser runtime.
+  See [the interoperability exercise](interoperability.md). This is a second implementation
+  within the project; adoption by external implementers remains unproven.
 
 These are reference capabilities, not evidence of production deployment, exactly-once
 effects or successful operation in every chat host.
@@ -26,7 +30,7 @@ effects or successful operation in every chat host.
 
 | Question | Useful result |
 |---|---|
-| Can others implement AUG independently? | A small backend and a second runtime using the written contract, with reusable conformance fixtures and a record of ambiguities |
+| Can external developers implement AUG independently? | Reproduce the standalone pair and wire vectors, then contribute an implementation from the specification and report ambiguities |
 | How should profiles evolve? | Explicit compatibility/version rules and tests for independently extended runtimes; keep JSON/text fallbacks intentional |
 | Which additional outputs matter? | A bounded reference/document profile implementation, including authorization, expiry and safe fetching; streaming needs its own contract |
 | Can an effect be reconciled after uncertainty? | A synthetic backend with durable business idempotency and an explicit reconciliation flow, tested across crashes without blind replay |

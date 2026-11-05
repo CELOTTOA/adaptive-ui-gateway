@@ -32,10 +32,14 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
           cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
       - run: npm ci
       # Builds every package, then runs contract and integration tests.
       # Live tests are skipped here because no API key is provided.
       - run: npm test
+      - run: npm run test:interop
       - run: npm run smoke:demo
       - run: npm run check:publication -- --history
       - name: Audit production dependencies

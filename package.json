@@ -13,6 +13,7 @@
     "build": "tsc -b apps/gateway-server apps/mcp-apps-server examples/customer-api",
     "clean": "tsc -b apps/gateway-server apps/mcp-apps-server examples/customer-api --clean",
     "test": "npm run build && node --test tests/**/*.test.mjs",
+    "test:interop": "npm run build && node --test tests/interoperability/*.interop.mjs",
     "demo": "npm run build && node --env-file-if-exists=.envlocal apps/gateway-server/dist/demo.js",
     "demo:archteathos": "npm run build && node examples/archteathos/demo.mjs",
     "backend:archteathos": "node examples/archteathos/backend.mjs",
